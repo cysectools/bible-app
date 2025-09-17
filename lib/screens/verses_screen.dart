@@ -3,7 +3,8 @@ import '../services/api_service.dart';
 import '../services/memorization_service.dart';
 
 class VersesScreen extends StatefulWidget {
-  const VersesScreen({super.key});
+  final ValueChanged<int>? onSelectTab; // 0: Verses, 1: Home, 2: Memorization
+  const VersesScreen({super.key, this.onSelectTab});
 
   @override
   State<VersesScreen> createState() => _VersesScreenState();
