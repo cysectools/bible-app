@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 showAboutDialog(
                   context: context,
                   applicationName: 'Bible App',
-                  applicationVersion: '1.0.0',
+                  applicationVersion: '1.0.1',
                   applicationIcon: const Icon(Icons.book, size: 48),
                 );
               },
