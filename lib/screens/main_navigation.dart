@@ -4,6 +4,7 @@ import 'animated_home_screen.dart';
 import 'verses_screen.dart';
 import 'memorization_screen.dart';
 import 'armor_of_god_screen.dart';
+import 'notes_list_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -28,6 +29,7 @@ class _MainNavigationState extends State<MainNavigation> {
   ArmorOfGodScreen(
     onSelectTab: (index) => setState(() => _currentIndex = index),
   ),
+  const NotesListScreen(),
 ];
 
 
@@ -61,6 +63,10 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.shield),
             label: 'Armor',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.note),
+            label: 'Notes',
           ),
         ],
       ),

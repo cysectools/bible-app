@@ -450,6 +450,14 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
               widget.onSelectTab?.call(3);
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.note, color: Colors.deepPurple),
+            title: const Text('Notes', style: TextStyle(color: Colors.deepPurple)),
+            onTap: () {
+              Navigator.pop(context);
+              widget.onSelectTab?.call(4);
+            },
+          ),
           const Divider(color: Colors.deepPurple),
           ListTile(
             leading: const Icon(Icons.settings, color: Colors.deepPurple),
