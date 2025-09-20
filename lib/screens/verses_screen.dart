@@ -7,7 +7,7 @@ class VersesScreen extends StatefulWidget {
   const VersesScreen({super.key, this.onSelectTab});
 
   @override
-  State<VersesScreen> createState() => _VersesScreenState();
+  _VersesScreenState createState() => _VersesScreenState();
 }
 
 class _VersesScreenState extends State<VersesScreen> {
@@ -55,13 +55,16 @@ class _VersesScreenState extends State<VersesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("📖 Verses"),
-        titleTextStyle: const TextStyle(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20
+          ),
         backgroundColor: Colors.deepPurple,
         centerTitle: true,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),

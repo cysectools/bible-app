@@ -123,10 +123,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text("📖 Daily Bible Verse"),
-        titleTextStyle: const TextStyle(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+           fontSize: 20
+           ),
         backgroundColor: Colors.deepPurple,
         centerTitle: true,
         elevation: 0,
@@ -142,24 +145,31 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
+            DrawerHeader(
+              decoration: const BoxDecoration(
                 color: Colors.deepPurple,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.book, color: Colors.white, size: 48),
-                  SizedBox(height: 8),
-                  Text(
-                    'Bible App',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  const Icon(Icons.book, color: Colors.white, size: 48),
+                  const SizedBox(height: 8),
+                  GestureDetector( // Must Wrap This Around Any Text Property Bro :/
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.onSelectTab?.call(1); // Home screen
+                    },
+                    child: const Text(
+                      'Bible App',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  Text(
+                  const SizedBox(height: 4),
+                  const Text(
                     'Daily inspiration',
                     style: TextStyle(color: Colors.white70),
                   ),

@@ -7,7 +7,7 @@ class MemorizationScreen extends StatefulWidget {
   const MemorizationScreen({super.key, this.onSelectTab});
 
   @override
-  State<MemorizationScreen> createState() => _MemorizationScreenState();
+  _MemorizationScreenState createState() => _MemorizationScreenState();
 }
 
 class _MemorizationScreenState extends State<MemorizationScreen>
@@ -37,14 +37,17 @@ class _MemorizationScreenState extends State<MemorizationScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("📚 Daily Bible Verse"),
-        titleTextStyle: const TextStyle(color: Colors.white),
+        title: const Text("📚 Memorization"),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20
+          ),
         backgroundColor: Colors.deepPurple,
         centerTitle: true,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),

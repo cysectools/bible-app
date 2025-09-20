@@ -1,6 +1,8 @@
+// import 'package:bible_app/screens/armor_of_god.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'verses_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'memorization_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -14,12 +16,20 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 1; // Start on Home (middle tab)
 
   List<Widget> get _screens => [
-    const VersesScreen(),
-    HomeScreen(
-      onSelectTab: (index) => setState(() => _currentIndex = index),
-    ),
-    const MemorizationScreen(),
-  ];
+  VersesScreen(
+    onSelectTab: (index) => setState(() => _currentIndex = index),
+  ),
+  HomeScreen(
+    onSelectTab: (index) => setState(() => _currentIndex = index),
+  ),
+  MemorizationScreen(
+    onSelectTab: (index) => setState(() => _currentIndex = index),
+  ),
+  // ArmorOfGod(
+  //   onSelectTab: (index) => setState(() => _currentIndex = index),
+  // )
+];
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +58,10 @@ class _MainNavigationState extends State<MainNavigation> {
             icon: Icon(Icons.school),
             label: 'Memorization',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shield),
+            label: 'Armor'
+            )
         ],
       ),
     );

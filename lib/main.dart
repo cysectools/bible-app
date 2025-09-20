@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/notification_service.dart';
 import 'screens/main_navigation.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
         useMaterial3: true,
       ),
-      home: const MainNavigation(),
+      home: const SplashScreen(),
     );
   }
 }
