@@ -22,7 +22,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
   
   bool _isPlaying = false;
   bool _isPaused = false;
-  double _speechRate = 1.0;
+  double _speechRate = 0.7; // Slower default speed
   String _currentVerse = "";
 
   @override
@@ -38,9 +38,9 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
     
     // Set up TTS parameters
     await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(_speechRate);
+    await _flutterTts.setSpeechRate(0.7); // Set initial rate
     await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(1.0);
+    await _flutterTts.setPitch(0.8); // Slightly lower pitch for clarity
     
     // Set up completion handler
     _flutterTts.setCompletionHandler(() {
@@ -56,8 +56,9 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
         _isPlaying = false;
         _isPaused = false;
       });
+      print("TTS Error: $msg");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $msg")),
+        SnackBar(content: Text("TTS Error: $msg")),
       );
     });
   }
@@ -86,13 +87,19 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
       });
     } else if (_isPaused) {
       // If paused, restart from beginning
+      await _flutterTts.setSpeechRate(_speechRate);
+      await _flutterTts.setVolume(1.0);
+      await _flutterTts.setPitch(0.8);
       await _flutterTts.speak(_currentVerse);
       setState(() {
         _isPaused = false;
       });
     } else {
       // Start speaking
+      print("Starting TTS with rate: $_speechRate");
       await _flutterTts.setSpeechRate(_speechRate);
+      await _flutterTts.setVolume(1.0);
+      await _flutterTts.setPitch(0.8);
       await _flutterTts.speak(_currentVerse);
       setState(() {
         _isPlaying = true;
@@ -112,6 +119,8 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
   void _setSpeechRate(double rate) async {
     _speechRate = rate;
     await _flutterTts.setSpeechRate(_speechRate);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(0.8);
     setState(() {});
   }
 
@@ -228,7 +237,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildSpeedButton("Slow", 0.5, Icons.slow_motion_video),
-                        _buildSpeedButton("Normal", 1.0, Icons.play_arrow),
+                        _buildSpeedButton("Normal", 0.7, Icons.play_arrow),
                       ],
                     ),
                   ],
@@ -285,7 +294,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                   // Stop button
                   ElevatedButton.icon(
                     onPressed: _isPlaying ? _stop : null,
-                    icon: const Icon(Icons.stop, size: 32),
+                    icon: const Icon(Icons.stop, size: 32, color: Colors.white),
                     label: const Text(
                       "Stop",
                       style: TextStyle(fontSize: 16),
@@ -293,7 +302,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _isPlaying 
                           ? Colors.red 
-                          : Colors.grey.withOpacity(0.3),
+                          : Colors.white.withOpacity(0.3),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,

@@ -320,11 +320,11 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
               children: [
                 ElevatedButton.icon(
                   onPressed: _resetSelection,
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
                   label: const Text("Back"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple.withOpacity(0.1),
-                    foregroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

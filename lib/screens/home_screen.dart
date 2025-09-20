@@ -338,11 +338,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 print("🔘 New Verse button pressed!");
                 _loadRandomVerse();
               },
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               label: const Text("New Verse"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               },
-              icon: const Icon(Icons.image),
+              icon: const Icon(Icons.image, color: Colors.white),
               label: const Text("Save as Image"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
@@ -364,10 +364,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             TextButton.icon(
               onPressed: _showMoodSelectorAgain,
-              icon: const Icon(Icons.mood),
+              icon: const Icon(Icons.mood, color: Colors.white),
               label: const Text("Change Mood"),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
               ),
             ),
           ],

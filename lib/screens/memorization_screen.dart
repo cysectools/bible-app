@@ -44,6 +44,7 @@ class _MemorizationScreenState extends State<MemorizationScreen>
           titleTextStyle: const TextStyle(
             color: Colors.deepPurple,
             fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
           backgroundColor: Colors.transparent,
           centerTitle: true,
@@ -114,6 +115,14 @@ class _MemorizationScreenState extends State<MemorizationScreen>
                 onTap: () {
                   Navigator.pop(context);
                   widget.onSelectTab?.call(2);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.shield, color: Colors.deepPurple),
+                title: const Text('Armor of God', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelectTab?.call(3);
                 },
               ),
               const Divider(color: Colors.deepPurple),

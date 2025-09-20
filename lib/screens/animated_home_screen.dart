@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../widgets/animated_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'verse_screen_image.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab;
@@ -26,6 +27,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   bool _showVerse = false;
   String _currentVerse = "";
   Map<String, Offset> _emojiPositions = {};
+  Mood? _currentMood;
 
   @override
   void initState() {
@@ -114,6 +116,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   Future<void> _selectMood(Mood mood) async {
     setState(() {
       _showVerse = true;
+      _currentMood = mood;
     });
 
     try {
@@ -121,6 +124,18 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       setState(() => _currentVerse = verse);
     } catch (e) {
       setState(() => _currentVerse = "Error loading verse: $e");
+    }
+  }
+
+  Future<void> _loadNewVerse() async {
+    if (_currentMood != null) {
+      try {
+        setState(() => _currentVerse = "Loading new verse...");
+        final verse = await _getMoodSpecificVerse(_currentMood!);
+        setState(() => _currentVerse = verse);
+      } catch (e) {
+        setState(() => _currentVerse = "Error loading verse: $e");
+      }
     }
   }
 
@@ -183,6 +198,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     setState(() {
       _showVerse = false;
       _currentVerse = "";
+      _currentMood = null;
     });
   }
 
@@ -306,28 +322,58 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Column(
               children: [
                 ElevatedButton.icon(
-                  onPressed: _resetSelection,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text("New Mood"),
+                  onPressed: _loadNewVerse,
+                  icon: const Icon(Icons.auto_awesome, color: Colors.white),
+                  label: const Text("New Verse"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white.withOpacity(0.2),
                     foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Navigate to verse image screen
-                  },
-                  icon: const Icon(Icons.image),
-                  label: const Text("Save"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple.withOpacity(0.7),
-                    foregroundColor: Colors.white,
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _resetSelection,
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      label: const Text("New Mood"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => VerseImageScreen(verse: _currentVerse),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.image, color: Colors.white),
+                      label: const Text("Save"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple.withOpacity(0.7),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -396,6 +442,14 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
               widget.onSelectTab?.call(2);
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.shield, color: Colors.deepPurple),
+            title: const Text('Armor of God', style: TextStyle(color: Colors.deepPurple)),
+            onTap: () {
+              Navigator.pop(context);
+              widget.onSelectTab?.call(3);
+            },
+          ),
           const Divider(color: Colors.deepPurple),
           ListTile(
             leading: const Icon(Icons.settings, color: Colors.deepPurple),
@@ -440,8 +494,10 @@ class _DraggableEmojiState extends State<DraggableEmoji>
   late Offset _position;
   late AnimationController _floatController;
   late AnimationController _pulseController;
+  late AnimationController _rotationController;
   late Animation<double> _floatAnimation;
   late Animation<double> _pulseAnimation;
+  late Animation<double> _rotationAnimation;
   bool _isDragging = false;
   bool _showLabel = false;
 
@@ -451,12 +507,17 @@ class _DraggableEmojiState extends State<DraggableEmoji>
     _position = widget.initialPosition;
     
     _floatController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 3000),
       vsync: this,
     )..repeat(reverse: true);
     
     _pulseController = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat();
+
+    _rotationController = AnimationController(
+      duration: const Duration(seconds: 20),
       vsync: this,
     )..repeat();
 
@@ -470,10 +531,18 @@ class _DraggableEmojiState extends State<DraggableEmoji>
 
     _pulseAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.2,
+      end: 1.1,
     ).animate(CurvedAnimation(
       parent: _pulseController,
       curve: Curves.easeInOut,
+    ));
+
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _rotationController,
+      curve: Curves.linear,
     ));
   }
 
@@ -481,6 +550,7 @@ class _DraggableEmojiState extends State<DraggableEmoji>
   void dispose() {
     _floatController.dispose();
     _pulseController.dispose();
+    _rotationController.dispose();
     super.dispose();
   }
 
@@ -519,13 +589,15 @@ class _DraggableEmojiState extends State<DraggableEmoji>
         },
         onTap: widget.onTap,
         child: AnimatedBuilder(
-          animation: Listenable.merge([_floatAnimation, _pulseAnimation]),
+          animation: Listenable.merge([_floatAnimation, _pulseAnimation, _rotationAnimation]),
           builder: (context, child) {
             return Transform.translate(
               offset: Offset(0, _isDragging ? 0 : _floatAnimation.value),
               child: Transform.scale(
                 scale: _isDragging ? 1.3 : _pulseAnimation.value,
-                child: Column(
+                child: Transform.rotate(
+                  angle: _isDragging ? 0 : _rotationAnimation.value * 2 * math.pi * 0.1, // Very slow rotation
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
@@ -572,6 +644,7 @@ class _DraggableEmojiState extends State<DraggableEmoji>
                         ),
                       ),
                   ],
+                ),
                 ),
               ),
             );
