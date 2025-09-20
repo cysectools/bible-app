@@ -22,44 +22,56 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
   
   bool _isPlaying = false;
   bool _isPaused = false;
-  double _speechRate = 0.7; // Slower default speed
+  double _speechRate = 1.0;
   String _currentVerse = "";
+  List<String> _verseLines = [];
+  int? _selectedLineIndex;
 
   @override
   void initState() {
     super.initState();
     _currentVerse = widget.verse;
+    _parseVerseIntoLines();
     _initializeTts();
     _initializeAnimations();
+  }
+
+  void _parseVerseIntoLines() {
+    // Split verse into lines, handling common verse formatting
+    _verseLines = _currentVerse
+        .split(RegExp(r'[.!?]\s*'))
+        .where((line) => line.trim().isNotEmpty)
+        .map((line) => line.trim())
+        .toList();
+    
+    // If no sentences found, split by commas or just use the whole verse
+    if (_verseLines.isEmpty) {
+      _verseLines = _currentVerse
+          .split(',')
+          .where((line) => line.trim().isNotEmpty)
+          .map((line) => line.trim())
+          .toList();
+    }
+    
+    // If still no lines, use the whole verse as one line
+    if (_verseLines.isEmpty) {
+      _verseLines = [_currentVerse];
+    }
   }
 
   void _initializeTts() async {
     _flutterTts = FlutterTts();
     
-    // Set up TTS parameters
     await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(0.7); // Set initial rate
+    await _flutterTts.setSpeechRate(1.0);
     await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(0.8); // Slightly lower pitch for clarity
     
-    // Set up completion handler
     _flutterTts.setCompletionHandler(() {
       setState(() {
         _isPlaying = false;
         _isPaused = false;
+        _selectedLineIndex = null;
       });
-    });
-    
-    // Set up error handler
-    _flutterTts.setErrorHandler((msg) {
-      setState(() {
-        _isPlaying = false;
-        _isPaused = false;
-      });
-      print("TTS Error: $msg");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("TTS Error: $msg")),
-      );
     });
   }
 
@@ -80,28 +92,35 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
 
   Future<void> _speak() async {
     if (_isPlaying && !_isPaused) {
-      // If currently playing, pause
       await _flutterTts.pause();
       setState(() {
         _isPaused = true;
       });
     } else if (_isPaused) {
-      // If paused, restart from beginning
-      await _flutterTts.setSpeechRate(_speechRate);
-      await _flutterTts.setVolume(1.0);
-      await _flutterTts.setPitch(0.8);
       await _flutterTts.speak(_currentVerse);
       setState(() {
         _isPaused = false;
       });
     } else {
-      // Start speaking
-      print("Starting TTS with rate: $_speechRate");
       await _flutterTts.setSpeechRate(_speechRate);
-      await _flutterTts.setVolume(1.0);
-      await _flutterTts.setPitch(0.8);
       await _flutterTts.speak(_currentVerse);
       setState(() {
+        _isPlaying = true;
+        _isPaused = false;
+      });
+    }
+  }
+
+  Future<void> _speakLine(int lineIndex) async {
+    if (lineIndex >= 0 && lineIndex < _verseLines.length) {
+      final line = _verseLines[lineIndex];
+      
+      await _flutterTts.stop();
+      await _flutterTts.setSpeechRate(_speechRate);
+      await _flutterTts.speak(line);
+      
+      setState(() {
+        _selectedLineIndex = lineIndex;
         _isPlaying = true;
         _isPaused = false;
       });
@@ -113,14 +132,13 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
     setState(() {
       _isPlaying = false;
       _isPaused = false;
+      _selectedLineIndex = null; // Reset selected line when stopped
     });
   }
 
   void _setSpeechRate(double rate) async {
     _speechRate = rate;
     await _flutterTts.setSpeechRate(_speechRate);
-    await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(0.8);
     setState(() {});
   }
 
@@ -179,7 +197,6 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                     ],
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.volume_up,
@@ -187,14 +204,92 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                         color: Colors.deepPurple.withOpacity(0.7),
                       ),
                       const SizedBox(height: 20),
-                      Text(
-                        _currentVerse,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.deepPurple,
-                          height: 1.6,
+                      // Scrollable verse lines
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: _verseLines.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final line = entry.value;
+                              final isSelected = _selectedLineIndex == index;
+                              
+                              return GestureDetector(
+                                onTap: () => _speakLine(index),
+                                child: Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.symmetric(vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected 
+                                        ? Colors.deepPurple.withOpacity(0.1)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected 
+                                          ? Colors.deepPurple.withOpacity(0.3)
+                                          : Colors.transparent,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Line number indicator
+                                      Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          color: isSelected 
+                                              ? Colors.deepPurple
+                                              : Colors.deepPurple.withOpacity(0.3),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '${index + 1}',
+                                            style: TextStyle(
+                                              color: isSelected 
+                                                  ? Colors.white
+                                                  : Colors.deepPurple,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      // Line text
+                                      Expanded(
+                                        child: Text(
+                                          line,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.deepPurple,
+                                            height: 1.4,
+                                            fontWeight: isSelected 
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                      // Play icon for the line
+                                      Icon(
+                                        Icons.volume_up,
+                                        size: 20,
+                                        color: isSelected 
+                                            ? Colors.deepPurple
+                                            : Colors.deepPurple.withOpacity(0.5),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -237,7 +332,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildSpeedButton("Slow", 0.5, Icons.slow_motion_video),
-                        _buildSpeedButton("Normal", 0.7, Icons.play_arrow),
+                        _buildSpeedButton("Normal", 1.0, Icons.play_arrow),
                       ],
                     ),
                   ],
@@ -294,7 +389,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                   // Stop button
                   ElevatedButton.icon(
                     onPressed: _isPlaying ? _stop : null,
-                    icon: const Icon(Icons.stop, size: 32, color: Colors.white),
+                    icon: const Icon(Icons.stop, size: 32),
                     label: const Text(
                       "Stop",
                       style: TextStyle(fontSize: 16),
@@ -336,7 +431,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        "Listen to the verse being read aloud. This helps with auditory memorization and pronunciation.",
+                        "Tap any line to hear it spoken individually, or use the main controls to play the entire verse. This helps with focused memorization practice.",
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.deepPurple.withOpacity(0.8),

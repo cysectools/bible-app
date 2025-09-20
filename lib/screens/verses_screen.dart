@@ -89,7 +89,7 @@ class _VersesScreenState extends State<VersesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.book, color: Colors.white, size: 48),
+                    Icon(Icons.menu_book, color: Colors.white, size: 48),
                     SizedBox(height: 8),
                     Text(
                       'Bible App',
@@ -100,7 +100,7 @@ class _VersesScreenState extends State<VersesScreen> {
                       ),
                     ),
                     Text(
-                      'Daily inspiration',
+                      'Verses',
                       style: TextStyle(color: Colors.white70),
                     ),
                   ],

@@ -73,7 +73,7 @@ class _MemorizationScreenState extends State<MemorizationScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.book, color: Colors.white, size: 48),
+                    Icon(Icons.school, color: Colors.white, size: 48),
                     SizedBox(height: 8),
                     Text(
                       'Bible App',
@@ -84,7 +84,7 @@ class _MemorizationScreenState extends State<MemorizationScreen>
                       ),
                     ),
                     Text(
-                      'Daily inspiration',
+                      'Memorization',
                       style: TextStyle(color: Colors.white70),
                     ),
                   ],

@@ -412,7 +412,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Space of emotions',
+                  'Space of Emotions',
                   style: TextStyle(color: Colors.white70),
                 ),
               ],
@@ -494,10 +494,8 @@ class _DraggableEmojiState extends State<DraggableEmoji>
   late Offset _position;
   late AnimationController _floatController;
   late AnimationController _pulseController;
-  late AnimationController _rotationController;
   late Animation<double> _floatAnimation;
   late Animation<double> _pulseAnimation;
-  late Animation<double> _rotationAnimation;
   bool _isDragging = false;
   bool _showLabel = false;
 
@@ -512,12 +510,7 @@ class _DraggableEmojiState extends State<DraggableEmoji>
     )..repeat(reverse: true);
     
     _pulseController = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat();
-
-    _rotationController = AnimationController(
-      duration: const Duration(seconds: 20),
+      duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat();
 
@@ -531,18 +524,10 @@ class _DraggableEmojiState extends State<DraggableEmoji>
 
     _pulseAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.1,
+      end: 1.05,
     ).animate(CurvedAnimation(
       parent: _pulseController,
       curve: Curves.easeInOut,
-    ));
-
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _rotationController,
-      curve: Curves.linear,
     ));
   }
 
@@ -550,7 +535,6 @@ class _DraggableEmojiState extends State<DraggableEmoji>
   void dispose() {
     _floatController.dispose();
     _pulseController.dispose();
-    _rotationController.dispose();
     super.dispose();
   }
 
@@ -589,15 +573,13 @@ class _DraggableEmojiState extends State<DraggableEmoji>
         },
         onTap: widget.onTap,
         child: AnimatedBuilder(
-          animation: Listenable.merge([_floatAnimation, _pulseAnimation, _rotationAnimation]),
+          animation: Listenable.merge([_floatAnimation, _pulseAnimation]),
           builder: (context, child) {
             return Transform.translate(
               offset: Offset(0, _isDragging ? 0 : _floatAnimation.value),
               child: Transform.scale(
                 scale: _isDragging ? 1.3 : _pulseAnimation.value,
-                child: Transform.rotate(
-                  angle: _isDragging ? 0 : _rotationAnimation.value * 2 * math.pi * 0.1, // Very slow rotation
-                  child: Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
@@ -644,7 +626,6 @@ class _DraggableEmojiState extends State<DraggableEmoji>
                         ),
                       ),
                   ],
-                ),
                 ),
               ),
             );
