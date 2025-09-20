@@ -1,9 +1,9 @@
 // import 'package:bible_app/screens/armor_of_god.dart';
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'animated_home_screen.dart';
 import 'verses_screen.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'memorization_screen.dart';
+import 'armor_of_god_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -19,15 +19,15 @@ class _MainNavigationState extends State<MainNavigation> {
   VersesScreen(
     onSelectTab: (index) => setState(() => _currentIndex = index),
   ),
-  HomeScreen(
+  AnimatedHomeScreen(
     onSelectTab: (index) => setState(() => _currentIndex = index),
   ),
   MemorizationScreen(
     onSelectTab: (index) => setState(() => _currentIndex = index),
   ),
-  // ArmorOfGod(
-  //   onSelectTab: (index) => setState(() => _currentIndex = index),
-  // )
+  ArmorOfGodScreen(
+    onSelectTab: (index) => setState(() => _currentIndex = index),
+  ),
 ];
 
 
@@ -60,8 +60,8 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shield),
-            label: 'Armor'
-            )
+            label: 'Armor',
+          ),
         ],
       ),
     );

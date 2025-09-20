@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/memorization_service.dart';
+import '../widgets/animated_background.dart';
 
 class VersesScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab; // 0: Verses, 1: Home, 2: Memorization
@@ -52,199 +53,257 @@ class _VersesScreenState extends State<VersesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("📖 Verses"),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text("📖 Verses"),
+          titleTextStyle: const TextStyle(
+            color: Colors.deepPurple,
+            fontSize: 20,
           ),
-        backgroundColor: Colors.deepPurple,
-        centerTitle: true,
-        elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+          backgroundColor: Colors.transparent,
+          centerTitle: true,
+          elevation: 0,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Colors.deepPurple),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
         ),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.book, color: Colors.white, size: 48),
-                  SizedBox(height: 8),
-                  Text(
-                    'Bible App',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+        drawer: Drawer(
+          backgroundColor: Colors.white,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.deepPurple, Colors.indigo],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  Text(
-                    'Daily inspiration',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-                widget.onSelectTab?.call(1);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.menu_book),
-              title: const Text('Verses'),
-              onTap: () {
-                Navigator.pop(context);
-                widget.onSelectTab?.call(0);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.school),
-              title: const Text('Memorization'),
-              onTap: () {
-                Navigator.pop(context);
-                widget.onSelectTab?.call(2);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Settings coming soon!")),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('About'),
-              onTap: () {
-                Navigator.pop(context);
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'Bible App',
-                  applicationVersion: '1.0.1',
-                  applicationIcon: const Icon(Icons.book, size: 48),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: "Search verses...",
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.clear),
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                filled: true,
-                fillColor: Colors.grey[100],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.book, color: Colors.white, size: 48),
+                    SizedBox(height: 8),
+                    Text(
+                      'Bible App',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Daily inspiration',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.home, color: Colors.deepPurple),
+                title: const Text('Home', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelectTab?.call(1);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.menu_book, color: Colors.deepPurple),
+                title: const Text('Verses', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelectTab?.call(0);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.school, color: Colors.deepPurple),
+                title: const Text('Memorization', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelectTab?.call(2);
+                },
+              ),
+              const Divider(color: Colors.deepPurple),
+              ListTile(
+                leading: const Icon(Icons.settings, color: Colors.deepPurple),
+                title: const Text('Settings', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Settings coming soon!")),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info, color: Colors.deepPurple),
+                title: const Text('About', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  showAboutDialog(
+                    context: context,
+                    applicationName: 'Bible App',
+                    applicationVersion: '1.0.1',
+                    applicationIcon: const Icon(Icons.book, size: 48),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.deepPurple.withOpacity(0.2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.deepPurple.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: "Search verses...",
+                    hintStyle: TextStyle(color: Colors.deepPurple.withOpacity(0.5)),
+                    prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.clear, color: Colors.deepPurple),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
               ),
             ),
-          ),
-          if (_isLoading) const Expanded(child: Center(child: CircularProgressIndicator())),
-          if (!_isLoading) Expanded(
-            child: _filteredVerses.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          "No verses found",
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
+            if (_isLoading) const Expanded(child: Center(child: CircularProgressIndicator())),
+            if (!_isLoading)
+              Expanded(
+                child: _filteredVerses.isEmpty
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off, size: 64, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text(
+                              "No verses found",
+                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "Try a different search term",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Try a different search term",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _filteredVerses.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _filteredVerses[index],
-                                style: const TextStyle(fontSize: 16),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _filteredVerses.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.deepPurple.withOpacity(0.2),
+                                width: 1,
                               ),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.deepPurple.withOpacity(0.1),
+                                  blurRadius: 15,
+                                  spreadRadius: 2,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  TextButton.icon(
-                                    onPressed: () async {
-                                      final added = await MemorizationService.add(_filteredVerses[index]);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(added ? "Added to memorization!" : "Already memorized.")),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.bookmark_add),
-                                    label: const Text("Memorize"),
+                                  Text(
+                                    _filteredVerses[index],
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.deepPurple,
+                                      height: 1.5,
+                                    ),
                                   ),
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      // TODO: Share verse
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("Share feature coming soon!")),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.share),
-                                    label: const Text("Share"),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton.icon(
+                                        onPressed: () async {
+                                          final added = await MemorizationService.add(_filteredVerses[index]);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(added ? "Added to memorization!" : "Already memorized.")),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.bookmark_add, color: Colors.deepPurple),
+                                        label: const Text("Memorize", style: TextStyle(color: Colors.deepPurple)),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          // TODO: Share verse
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text("Share feature coming soon!")),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.share, color: Colors.deepPurple),
+                                        label: const Text("Share", style: TextStyle(color: Colors.deepPurple)),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+          ],
+        ),
       ),
     );
   }
