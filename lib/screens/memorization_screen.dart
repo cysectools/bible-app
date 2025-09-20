@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/memorization_service.dart';
 import '../widgets/animated_background.dart';
-import 'flashcard_screen.dart'; // 👈 import the flashcard screen
+import 'auditory_practice_screen.dart'; // 👈 import the auditory practice screen
 
 class MemorizationScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab; // 0: Verses, 1: Home, 2: Memorization
@@ -239,13 +239,13 @@ class _MemorizationScreenState extends State<MemorizationScreen>
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const FlashcardScreen(),
+                                            AuditoryPracticeScreen(verse: verse),
                                       ),
                                     );
                                   },
-                                  icon: const Icon(Icons.play_arrow,
+                                  icon: const Icon(Icons.volume_up,
                                       color: Colors.deepPurple),
-                                  label: const Text("Practice",
+                                  label: const Text("Listen",
                                       style:
                                           TextStyle(color: Colors.deepPurple)),
                                   style: TextButton.styleFrom(

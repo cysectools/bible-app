@@ -337,7 +337,7 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                       const SnackBar(content: Text("Feature coming soon!")),
                     );
                   },
-                  icon: const Icon(Icons.bookmark_add),
+                  icon: const Icon(Icons.bookmark_add, color: Colors.white),
                   label: const Text("Save"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
