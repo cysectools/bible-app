@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/notes_service.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/custom_drawer.dart';
 import 'note_editor_screen.dart';
+import 'main_navigation.dart';
 
 class NotesListScreen extends StatefulWidget {
   const NotesListScreen({super.key});
@@ -144,10 +146,22 @@ class _NotesListScreenState extends State<NotesListScreen> {
             ),
           ),
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF6A4C93)),
-            onPressed: () => Navigator.of(context).pop(),
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Color(0xFF6A4C93)),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
+        ),
+        drawer: CustomDrawer(
+          currentScreen: 'Notes',
+          onNavigate: (index) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MainNavigation(initialIndex: index),
+              ),
+            );
+          },
         ),
         body: _isLoading
             ? const Center(
@@ -374,6 +388,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
       ),
     );
   }
+
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();

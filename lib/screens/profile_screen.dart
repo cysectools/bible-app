@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/user_service.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/custom_drawer.dart';
+import 'main_navigation.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,6 +15,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile? _currentUser;
   bool _isLoading = true;
+  bool _isHexCodeVisible = false;
   final TextEditingController _usernameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -74,6 +77,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _showSuccessSnackBar('Hex code copied to clipboard!');
     } catch (e) {
       _showErrorSnackBar('Failed to copy hex code');
+    }
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Logout',
+          style: TextStyle(
+            color: Color(0xFF6A4C93),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to logout? You will need to create a new profile to access the app.',
+          style: TextStyle(color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Logout',
+              style: TextStyle(color: Color(0xFF6A4C93)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+      try {
+        await UserService.deleteUser();
+        setState(() {
+          _currentUser = null;
+          _isLoading = false;
+        });
+        _showSuccessSnackBar('Logged out successfully');
+      } catch (e) {
+        setState(() => _isLoading = false);
+        _showErrorSnackBar('Failed to logout');
+      }
     }
   }
 
@@ -168,10 +223,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF6A4C93)),
-            onPressed: () => Navigator.of(context).pop(),
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Color(0xFF6A4C93)),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
+        ),
+        drawer: CustomDrawer(
+          currentScreen: 'Profile',
+          onNavigate: (index) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MainNavigation(initialIndex: index),
+              ),
+            );
+          },
         ),
         body: _isLoading
             ? const Center(
@@ -435,14 +502,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      Text(
-                        _currentUser!.hexCode,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6A4C93),
-                          letterSpacing: 2,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _isHexCodeVisible 
+                                ? _currentUser!.hexCode 
+                                : '••••••••••',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6A4C93),
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isHexCodeVisible = !_isHexCodeVisible;
+                              });
+                            },
+                            child: Icon(
+                              _isHexCodeVisible ? Icons.visibility_off : Icons.visibility,
+                              color: const Color(0xFF6A4C93),
+                              size: 20,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -527,28 +614,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Deleting your profile will remove all your data including notes and group memberships.',
+                  'Logout will clear your session. Delete will permanently remove all your data including notes and group memberships.',
                   style: TextStyle(
                     color: Colors.black87,
                     fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _deleteProfile,
-                    icon: const Icon(Icons.delete_forever),
-                    label: const Text('Delete Profile'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _logout,
+                        icon: const Icon(Icons.logout),
+                        label: const Text('Logout'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _deleteProfile,
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('Delete'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -557,6 +663,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();

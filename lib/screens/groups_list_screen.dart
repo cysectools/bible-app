@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../services/groups_service.dart';
 import '../services/user_service.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/custom_drawer.dart';
 import 'create_group_screen.dart';
 import 'join_group_screen.dart';
 import 'group_chat_screen.dart';
+import 'main_navigation.dart';
 
 class GroupsListScreen extends StatefulWidget {
   const GroupsListScreen({super.key});
@@ -182,9 +184,11 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
             ),
           ),
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF6A4C93)),
-            onPressed: () => Navigator.of(context).pop(),
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Color(0xFF6A4C93)),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
           actions: [
             IconButton(
@@ -192,6 +196,16 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
               onPressed: _loadUserGroups,
             ),
           ],
+        ),
+        drawer: CustomDrawer(
+          currentScreen: 'Groups',
+          onNavigate: (index) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MainNavigation(initialIndex: index),
+              ),
+            );
+          },
         ),
         body: _isLoading
             ? const Center(
@@ -202,43 +216,20 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
             : _userGroups.isEmpty
                 ? _buildEmptyState()
                 : _buildGroupsList(),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              heroTag: "join_group",
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const JoinGroupScreen(),
-                  ),
-                );
-                if (result == true) {
-                  _loadUserGroups();
-                }
-              },
-              backgroundColor: Colors.green,
-              child: const Icon(Icons.group_add, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            FloatingActionButton(
-              heroTag: "create_group",
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateGroupScreen(),
-                  ),
-                );
-                if (result == true) {
-                  _loadUserGroups();
-                }
-              },
-              backgroundColor: const Color(0xFF6A4C93),
-              child: const Icon(Icons.add, color: Colors.white),
-            ),
-          ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreateGroupScreen(),
+              ),
+            );
+            if (result == true) {
+              _loadUserGroups();
+            }
+          },
+          backgroundColor: Colors.green,
+          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );
@@ -548,6 +539,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
       },
     );
   }
+
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
 import '../services/memorization_service.dart';
 import '../widgets/animated_background.dart';
 
@@ -24,24 +23,27 @@ class _VersesScreenState extends State<VersesScreen> {
 
   Future<void> _fetchInitial() async {
     setState(() => _isLoading = true);
-    try {
-      final List<String> fetched = [];
-      for (int i = 0; i < 10; i++) {
-        final v = await BibleApi.getRandomVerse();
-        if (!fetched.contains(v)) fetched.add(v);
-      }
-      setState(() {
-        _verses
-          ..clear()
-          ..addAll(fetched);
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("⚠️ Failed to load verses: $e")),
-      );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    
+    // Use local verses instead of API calls
+    final List<String> localVerses = [
+      "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life. - John 3:16",
+      "I can do all this through him who gives me strength. - Philippians 4:13",
+      "Trust in the Lord with all your heart and lean not on your own understanding. - Proverbs 3:5",
+      "The Lord is my shepherd, I lack nothing. - Psalm 23:1",
+      "And we know that in all things God works for the good of those who love him. - Romans 8:28",
+      "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go. - Joshua 1:9",
+      "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
+      "The Lord gives strength to his people; the Lord blesses his people with peace. - Psalm 29:11",
+      "You will keep in perfect peace those whose minds are steadfast, because they trust in you. - Isaiah 26:3",
+      "And the peace of God, which transcends all understanding, will guard your hearts and your minds. - Philippians 4:7"
+    ];
+    
+    setState(() {
+      _verses
+        ..clear()
+        ..addAll(localVerses);
+      _isLoading = false;
+    });
   }
 
   List<String> get _filteredVerses {

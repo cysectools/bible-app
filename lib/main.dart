@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'services/notification_service.dart';
-import 'screens/main_navigation.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {

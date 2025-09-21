@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'dart:ui';
-import '../services/api_service.dart';
 import '../widgets/animated_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -185,13 +184,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       ]
     };
 
-    try {
-      return await BibleApi.getRandomVerse();
-    } catch (e) {
-      final verses = moodVerses[mood]!;
-      final random = DateTime.now().millisecondsSinceEpoch % verses.length;
-      return verses[random];
-    }
+    final verses = moodVerses[mood]!;
+    final random = DateTime.now().millisecondsSinceEpoch % verses.length;
+    return verses[random];
   }
 
   void _resetSelection() {
