@@ -146,6 +146,22 @@ class _VersesScreenState extends State<VersesScreen> {
                   widget.onSelectTab?.call(4);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.group, color: Colors.deepPurple),
+                title: const Text('Groups', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelectTab?.call(5);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.person, color: Colors.deepPurple),
+                title: const Text('Profile', style: TextStyle(color: Colors.deepPurple)),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelectTab?.call(6);
+                },
+              ),
               const Divider(color: Colors.deepPurple),
               ListTile(
                 leading: const Icon(Icons.settings, color: Colors.deepPurple),

@@ -5,6 +5,8 @@ import 'verses_screen.dart';
 import 'memorization_screen.dart';
 import 'armor_of_god_screen.dart';
 import 'notes_list_screen.dart';
+import 'groups_list_screen.dart';
+import 'profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -30,6 +32,8 @@ class _MainNavigationState extends State<MainNavigation> {
     onSelectTab: (index) => setState(() => _currentIndex = index),
   ),
   const NotesListScreen(),
+  const GroupsListScreen(),
+  const ProfileScreen(),
 ];
 
 
@@ -67,6 +71,14 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.note),
             label: 'Notes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.group),
+            label: 'Groups',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
