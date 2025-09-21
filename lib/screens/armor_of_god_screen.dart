@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/custom_drawer.dart';
 
 class ArmorOfGodScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab;
@@ -93,7 +94,13 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
             ),
           ),
         ),
-        drawer: _buildDrawer(),
+        drawer: CustomDrawer(
+          currentScreen: 'Armor of God',
+          onNavigate: (index) {
+            Navigator.pop(context);
+            widget.onSelectTab?.call(index);
+          },
+        ),
         body: _showAdvice ? _buildAdviceDisplay() : _buildArmorGrid(),
       ),
     );
@@ -355,110 +362,4 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
     );
   }
 
-  Widget _buildDrawer() {
-    return Drawer(
-      backgroundColor: Colors.white,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepPurple, Colors.indigo],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.shield, color: Colors.white, size: 48),
-                SizedBox(height: 8),
-                Text(
-                  'Bible App',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Armor of God',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home, color: Colors.deepPurple),
-            title: const Text('Home', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(1);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.menu_book, color: Colors.deepPurple),
-            title: const Text('Verses', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(0);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.school, color: Colors.deepPurple),
-            title: const Text('Memorization', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(2);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.shield, color: Colors.deepPurple),
-            title: const Text('Armor of God', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(3);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.note, color: Colors.deepPurple),
-            title: const Text('Notes', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(4);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.group, color: Colors.deepPurple),
-            title: const Text('Groups', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(5);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person, color: Colors.deepPurple),
-            title: const Text('Profile', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(6);
-            },
-          ),
-          const Divider(color: Colors.deepPurple),
-          ListTile(
-            leading: const Icon(Icons.settings, color: Colors.deepPurple),
-            title: const Text('Settings', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Settings coming soon!")),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }

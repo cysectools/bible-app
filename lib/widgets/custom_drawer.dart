@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/streaks_service.dart';
 
 class CustomDrawer extends StatefulWidget {
   final String currentScreen;
@@ -21,6 +22,7 @@ class _CustomDrawerState extends State<CustomDrawer>
   late Animation<double> _bubbleAnimation;
   late Animation<Offset> _slideAnimation;
   bool _isBubbleOpen = false;
+  int _currentStreak = 0;
 
   final List<Map<String, dynamic>> _mainTabs = [
     {'icon': Icons.home, 'label': 'Home', 'index': 1},
@@ -59,6 +61,17 @@ class _CustomDrawerState extends State<CustomDrawer>
       parent: _slideController,
       curve: Curves.easeInOut,
     ));
+    
+    _loadCurrentStreak();
+  }
+
+  Future<void> _loadCurrentStreak() async {
+    final streak = await StreaksService.getCurrentStreak();
+    if (mounted) {
+      setState(() {
+        _currentStreak = streak;
+      });
+    }
   }
 
   @override
@@ -100,26 +113,65 @@ class _CustomDrawerState extends State<CustomDrawer>
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    Icon(
-                      _getScreenIcon(),
-                      color: Colors.white,
-                      size: 48,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          _getScreenIcon(),
+                          color: Colors.white,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Bible App',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          widget.currentScreen,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Bible App',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    // Streaks counter in top right
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.local_fire_department,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$_currentStreak',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      widget.currentScreen,
-                      style: const TextStyle(color: Colors.white70),
                     ),
                   ],
                 ),

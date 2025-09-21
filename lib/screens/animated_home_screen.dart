@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'verse_screen_image.dart';
 import '../services/api_service.dart';
+import '../services/streaks_service.dart';
 import 'main_navigation.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
@@ -30,6 +31,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   String _currentVerse = "";
   Map<String, Offset> _emojiPositions = {};
   Mood? _currentMood;
+  bool _ocdMode = false;
 
   @override
   void initState() {
@@ -84,6 +86,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   }
 
   void _createEmojis() {
+    _emojis.clear(); // Clear existing emojis
     final emojiData = [
       {"emoji": "😢", "mood": Mood.sad, "label": "Sad"},
       {"emoji": "😊", "mood": Mood.happy, "label": "Happy"},
@@ -106,10 +109,13 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
         mood: emojiData[i]["mood"] as Mood,
         label: emojiData[i]["label"] as String,
         initialPosition: initialPosition,
+        ocdMode: _ocdMode,
         onTap: () => _selectMood(emojiData[i]["mood"] as Mood),
         onPositionChanged: (newPosition) {
-          _emojiPositions[emojiKey] = newPosition;
-          _saveEmojiPositions();
+          if (!_ocdMode) {
+            _emojiPositions[emojiKey] = newPosition;
+            _saveEmojiPositions();
+          }
         },
       ));
     }
@@ -120,6 +126,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       _showVerse = true;
       _currentMood = mood;
     });
+
+    // Record mood selection for streak
+    await StreaksService.recordMoodSelection();
 
     try {
       final verse = await _getMoodSpecificVerse(mood);
@@ -208,6 +217,48 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     });
   }
 
+  void _toggleOCDMode() {
+    setState(() {
+      _ocdMode = !_ocdMode;
+      if (_ocdMode) {
+        _alignEmojis();
+      }
+      _createEmojis(); // Recreate emojis with new OCD mode
+    });
+  }
+
+  void _alignEmojis() {
+    if (_emojis.isEmpty) return;
+    
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Create a grid layout for emojis
+    final cols = 3;
+    final rows = 2;
+    final cellWidth = (screenWidth - 100) / cols;
+    final cellHeight = (screenHeight - 200) / rows;
+    
+    final alignedPositions = <String, Offset>{};
+    
+    for (int i = 0; i < _emojis.length && i < cols * rows; i++) {
+      final row = i ~/ cols;
+      final col = i % cols;
+      
+      final x = 50 + col * cellWidth + cellWidth / 2 - 30; // Center in cell
+      final y = 150 + row * cellHeight + cellHeight / 2 - 30; // Center in cell
+      
+      alignedPositions[_emojis[i].emoji] = Offset(x, y);
+    }
+    
+    setState(() {
+      _emojiPositions = alignedPositions;
+    });
+    
+    // Save the aligned positions
+    _saveEmojiPositions();
+  }
+
   @override
   void dispose() {
     _emojiController.dispose();
@@ -234,6 +285,16 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                _ocdMode ? Icons.grid_on : Icons.grid_off,
+                color: _ocdMode ? Colors.deepPurple : Colors.grey,
+              ),
+              onPressed: _toggleOCDMode,
+              tooltip: _ocdMode ? 'Disable OCD Mode' : 'Enable OCD Mode',
+            ),
+          ],
         ),
         drawer: CustomDrawer(
           currentScreen: 'Home',
@@ -302,45 +363,73 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     return Center(
       child: AnimatedBorderContainer(
         margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.6,
         borderRadius: 20,
-        borderColor: Colors.deepPurple,
+        borderColor: const Color(0xFF9E9E9E),
         borderWidth: 3,
         backgroundColor: Colors.transparent,
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withOpacity(0.3),
-            blurRadius: 20,
-            spreadRadius: 5,
+            color: const Color(0xFF9E9E9E).withOpacity(0.2),
+            blurRadius: 15,
+            spreadRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: const Color(0xFFE0E0E0).withOpacity(0.1),
+            blurRadius: 8,
+            spreadRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.05),
+            blurRadius: 5,
+            spreadRadius: 1,
+            offset: const Offset(0, 1),
           ),
         ],
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.deepPurple.withOpacity(0.8),
-                Colors.indigo.withOpacity(0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.5),
+              width: 2.5,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
-                child: Center(
-                  child: Text(
-                    _currentVerse,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontStyle: FontStyle.italic,
-                      height: 1.5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  child: SingleChildScrollView(
+                    child: Center(
+                      child: Text(
+                        _currentVerse,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontStyle: FontStyle.italic,
+                          height: 1.5,
+                          fontWeight: FontWeight.w600,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(2, 2),
+                              blurRadius: 4,
+                              color: Colors.black87,
+                            ),
+                            Shadow(
+                              offset: Offset(1, 1),
+                              blurRadius: 2,
+                              color: Colors.black54,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -353,7 +442,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                     icon: const Icon(Icons.auto_awesome, color: Colors.white),
                     label: const Text("New Verse"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
+                      backgroundColor: Colors.deepPurple,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -367,14 +456,15 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                     children: [
                       ElevatedButton.icon(
                         onPressed: _resetSelection,
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                        label: const Text("New Mood"),
+                        icon: const Icon(Icons.refresh, color: Colors.deepPurple),
+                        label: const Text("New Mood", style: TextStyle(color: Colors.deepPurple)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                          foregroundColor: Colors.deepPurple,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.deepPurple.withOpacity(0.3)),
                           ),
                         ),
                       ),
@@ -389,7 +479,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         icon: const Icon(Icons.image, color: Colors.white),
                         label: const Text("Save"),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple.withOpacity(0.7),
+                          backgroundColor: Colors.deepPurple,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -415,6 +505,7 @@ class DraggableEmoji extends StatefulWidget {
   final Mood mood;
   final String label;
   final Offset initialPosition;
+  final bool ocdMode;
   final VoidCallback onTap;
   final Function(Offset)? onPositionChanged;
 
@@ -424,6 +515,7 @@ class DraggableEmoji extends StatefulWidget {
     required this.mood,
     required this.label,
     required this.initialPosition,
+    required this.ocdMode,
     required this.onTap,
     this.onPositionChanged,
   });
@@ -473,31 +565,37 @@ class _DraggableEmojiState extends State<DraggableEmoji>
       top: _position.dy,
       child: GestureDetector(
         onPanStart: (details) {
-          setState(() {
-            _isDragging = true;
-            _showLabel = true;
-          });
+          if (!widget.ocdMode) {
+            setState(() {
+              _isDragging = true;
+              _showLabel = true;
+            });
+          }
         },
         onPanUpdate: (details) {
-          setState(() {
-            _position += details.delta;
-            _showLabel = true;
-          });
-          widget.onPositionChanged?.call(_position);
+          if (!widget.ocdMode) {
+            setState(() {
+              _position += details.delta;
+              _showLabel = true;
+            });
+            widget.onPositionChanged?.call(_position);
+          }
         },
         onPanEnd: (details) {
-          setState(() {
-            _isDragging = false;
-          });
-          
-          // Hide label after a delay
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              setState(() {
-                _showLabel = false;
-              });
-            }
-          });
+          if (!widget.ocdMode) {
+            setState(() {
+              _isDragging = false;
+            });
+            
+            // Hide label after a delay
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                setState(() {
+                  _showLabel = false;
+                });
+              }
+            });
+          }
         },
         onTap: widget.onTap,
         child: AnimatedBuilder(

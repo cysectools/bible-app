@@ -95,24 +95,25 @@ class AnimatedBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final random = math.Random(42); // Fixed seed for consistent patterns
     
-    // Draw animated flowing lines
+    // Draw animated flowing lines - Enhanced with more lines
     final linePaint = Paint()
-      ..color = Colors.deepPurple.withOpacity(0.1)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
+      ..color = Colors.deepPurple.withOpacity(0.12)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    // Reduced from 8 to 4 lines for better performance
-    for (int i = 0; i < 4; i++) {
-      final startX = (lineAnimationValue * 100 + i * 200) % (size.width + 100);
-      final startY = size.height * 0.2 + i * 120;
-      final endX = startX + 200;
-      final endY = startY + 100;
+    // Primary flowing lines (8 lines)
+    for (int i = 0; i < 8; i++) {
+      final startX = (lineAnimationValue * 120 + i * 150) % (size.width + 150);
+      final startY = size.height * 0.1 + i * 80;
+      final endX = startX + 180;
+      final endY = startY + 120;
       
       final path = Path();
       path.moveTo(startX, startY);
       path.quadraticBezierTo(
-        startX + 100,
-        startY + 50,
+        startX + 90,
+        startY + 60,
         endX,
         endY,
       );
@@ -120,20 +121,85 @@ class AnimatedBackgroundPainter extends CustomPainter {
       canvas.drawPath(path, linePaint);
     }
 
-    // Draw floating particles
+    // Secondary diagonal lines (6 lines)
+    final diagonalPaint = Paint()
+      ..color = Colors.deepPurple.withOpacity(0.08)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 6; i++) {
+      final startX = (lineAnimationValue * 80 + i * 200) % (size.width + 200);
+      final startY = size.height * 0.3 + i * 100;
+      final endX = startX + 150;
+      final endY = startY - 80;
+      
+      final path = Path();
+      path.moveTo(startX, startY);
+      path.quadraticBezierTo(
+        startX + 75,
+        startY - 40,
+        endX,
+        endY,
+      );
+      
+      canvas.drawPath(path, diagonalPaint);
+    }
+
+    // Horizontal accent lines (4 lines)
+    final horizontalPaint = Paint()
+      ..color = Colors.deepPurple.withOpacity(0.06)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 4; i++) {
+      final startX = (lineAnimationValue * 60 + i * 300) % (size.width + 300);
+      final startY = size.height * 0.2 + i * 150;
+      final endX = startX + 250;
+      final endY = startY;
+      
+      final path = Path();
+      path.moveTo(startX, startY);
+      path.quadraticBezierTo(
+        startX + 125,
+        startY + 20,
+        endX,
+        endY,
+      );
+      
+      canvas.drawPath(path, horizontalPaint);
+    }
+
+    // Draw floating particles - Enhanced
     final particlePaint = Paint()
       ..color = Colors.deepPurple.withOpacity(0.15)
       ..style = PaintingStyle.fill;
 
-    // Reduced from 30 to 12 particles for better performance
-    for (int i = 0; i < 12; i++) {
-      final x = (random.nextDouble() * size.width + particleAnimationValue * 30) % size.width;
-      final y = (random.nextDouble() * size.height + particleAnimationValue * 20) % size.height;
-      final radius = random.nextDouble() * 3 + 1;
+    // Primary particles (18 particles)
+    for (int i = 0; i < 18; i++) {
+      final x = (random.nextDouble() * size.width + particleAnimationValue * 40) % size.width;
+      final y = (random.nextDouble() * size.height + particleAnimationValue * 25) % size.height;
+      final radius = random.nextDouble() * 4 + 1;
       final opacity = (math.sin(particleAnimationValue * math.pi * 2 + i) + 1) / 2;
       
-      particlePaint.color = Colors.deepPurple.withOpacity(opacity * 0.2);
+      particlePaint.color = Colors.deepPurple.withOpacity(opacity * 0.25);
       canvas.drawCircle(Offset(x, y), radius, particlePaint);
+    }
+
+    // Secondary smaller particles (12 particles)
+    final smallParticlePaint = Paint()
+      ..color = Colors.deepPurple.withOpacity(0.1)
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 12; i++) {
+      final x = (random.nextDouble() * size.width + particleAnimationValue * 20) % size.width;
+      final y = (random.nextDouble() * size.height + particleAnimationValue * 15) % size.height;
+      final radius = random.nextDouble() * 2 + 0.5;
+      final opacity = (math.cos(particleAnimationValue * math.pi * 1.5 + i) + 1) / 2;
+      
+      smallParticlePaint.color = Colors.deepPurple.withOpacity(opacity * 0.15);
+      canvas.drawCircle(Offset(x, y), radius, smallParticlePaint);
     }
 
     // Draw subtle gradient overlay

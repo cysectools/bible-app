@@ -335,7 +335,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
           borderRadius: 20,
           borderColor: const Color(0xFF6A4C93),
           borderWidth: 2,
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF6A4C93).withOpacity(0.1),
@@ -378,8 +378,15 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                     group.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF6A4C93),
+                      color: Colors.white,
                       fontSize: 16,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(1, 1),
+                          blurRadius: 2,
+                          color: Colors.black54,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -408,8 +415,15 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                 Text(
                   group.description,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 2,
+                        color: Colors.black54,
+                      ),
+                    ],
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

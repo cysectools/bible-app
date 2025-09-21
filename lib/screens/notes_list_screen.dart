@@ -64,7 +64,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Delete Note',
@@ -253,7 +253,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                 borderRadius: 20,
                                 borderColor: const Color(0xFF6A4C93),
                                 borderWidth: 2,
-                                backgroundColor: Colors.white,
+                                backgroundColor: Colors.transparent,
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF6A4C93).withOpacity(0.1),
@@ -280,8 +280,15 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                     note.verseReference,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF6A4C93),
+                                      color: Colors.white,
                                       fontSize: 16,
+                                      shadows: [
+                                        Shadow(
+                                          offset: Offset(1, 1),
+                                          blurRadius: 2,
+                                          color: Colors.black54,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   subtitle: Column(
@@ -291,9 +298,16 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                       Text(
                                         note.verseText,
                                         style: TextStyle(
-                                          color: Colors.grey[600],
+                                          color: Colors.white.withOpacity(0.9),
                                           fontSize: 14,
                                           fontStyle: FontStyle.italic,
+                                          shadows: [
+                                            Shadow(
+                                              offset: Offset(1, 1),
+                                              blurRadius: 2,
+                                              color: Colors.black54,
+                                            ),
+                                          ],
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -302,8 +316,15 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                       Text(
                                         note.content,
                                         style: const TextStyle(
-                                          color: Colors.black87,
+                                          color: Colors.white,
                                           fontSize: 14,
+                                          shadows: [
+                                            Shadow(
+                                              offset: Offset(1, 1),
+                                              blurRadius: 2,
+                                              color: Colors.black54,
+                                            ),
+                                          ],
                                         ),
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,

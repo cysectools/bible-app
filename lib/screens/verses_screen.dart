@@ -174,26 +174,55 @@ class _VersesScreenState extends State<VersesScreen> {
                             margin: const EdgeInsets.only(bottom: 16),
                             padding: const EdgeInsets.all(20),
                             borderRadius: 20,
-                            borderColor: Colors.deepPurple,
-                            borderWidth: 2,
-                            backgroundColor: Colors.white,
+                            borderColor: const Color(0xFF9E9E9E),
+                            borderWidth: 3,
+                            backgroundColor: Colors.transparent,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.deepPurple.withOpacity(0.1),
+                                color: const Color(0xFF9E9E9E).withOpacity(0.2),
                                 blurRadius: 15,
+                                spreadRadius: 4,
+                                offset: const Offset(0, 4),
+                              ),
+                              BoxShadow(
+                                color: const Color(0xFFE0E0E0).withOpacity(0.1),
+                                blurRadius: 8,
                                 spreadRadius: 2,
-                                offset: const Offset(0, 5),
+                                offset: const Offset(0, 2),
+                              ),
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.05),
+                                blurRadius: 5,
+                                spreadRadius: 1,
+                                offset: const Offset(0, 1),
                               ),
                             ],
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.5),
+                                  width: 2.5,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                 Text(
                                   _filteredVerses[index],
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.deepPurple,
+                                    color: Colors.white,
                                     height: 1.5,
+                                    fontWeight: FontWeight.w500,
+                                    shadows: [
+                                      Shadow(
+                                        offset: Offset(1, 1),
+                                        blurRadius: 2,
+                                        color: Colors.black54,
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -236,6 +265,7 @@ class _VersesScreenState extends State<VersesScreen> {
                                   ],
                                 ),
                               ],
+                            ),
                             ),
                           );
                         },
