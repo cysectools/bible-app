@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../widgets/animated_background.dart';
+import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -299,101 +300,109 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
 
   Widget _buildVerseDisplay() {
     return Center(
-      child: Container(
+      child: AnimatedBorderContainer(
         margin: const EdgeInsets.all(20),
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.deepPurple.withOpacity(0.8),
-              Colors.indigo.withOpacity(0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.6,
+        borderRadius: 20,
+        borderColor: Colors.deepPurple,
+        borderWidth: 3,
+        backgroundColor: Colors.transparent,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.3),
+            blurRadius: 20,
+            spreadRadius: 5,
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
+        ],
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.deepPurple.withOpacity(0.8),
+                Colors.indigo.withOpacity(0.8),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: 5,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _currentVerse,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Column(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _loadNewVerse,
-                  icon: const Icon(Icons.auto_awesome, color: Colors.white),
-                  label: const Text("New Verse"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: Center(
+                  child: Text(
+                    _currentVerse,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontStyle: FontStyle.italic,
+                      height: 1.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _resetSelection,
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      label: const Text("New Mood"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+              ),
+              const SizedBox(height: 20),
+              Column(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _loadNewVerse,
+                    icon: const Icon(Icons.auto_awesome, color: Colors.white),
+                    label: const Text("New Verse"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => VerseImageScreen(verse: _currentVerse),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _resetSelection,
+                        icon: const Icon(Icons.refresh, color: Colors.white),
+                        label: const Text("New Mood"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.image, color: Colors.white),
-                      label: const Text("Save"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple.withOpacity(0.7),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => VerseImageScreen(verse: _currentVerse),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.image, color: Colors.white),
+                        label: const Text("Save"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple.withOpacity(0.7),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

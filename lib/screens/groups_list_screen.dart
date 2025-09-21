@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/groups_service.dart';
 import '../services/user_service.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
 import 'create_group_screen.dart';
 import 'join_group_screen.dart';
@@ -329,19 +330,19 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
         final isOwner = _currentUserHexCode != null && group.isOwner(_currentUserHexCode!);
         final member = _currentUserHexCode != null ? group.getMemberByHexCode(_currentUserHexCode!) : null;
         
-        return Container(
+        return AnimatedBorderContainer(
           margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6A4C93).withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
+          borderRadius: 20,
+          borderColor: const Color(0xFF6A4C93),
+          borderWidth: 2,
+          backgroundColor: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6A4C93).withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             onTap: () async {

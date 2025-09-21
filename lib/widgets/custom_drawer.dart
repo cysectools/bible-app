@@ -95,7 +95,7 @@ class _CustomDrawerState extends State<CustomDrawer>
               DrawerHeader(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF6A4C93), Color(0xFF4A2C7A)],
+                    colors: [Colors.deepPurple, Color(0xFF4A2C7A)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -132,7 +132,7 @@ class _CustomDrawerState extends State<CustomDrawer>
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: const Divider(
-                  color: Color(0xFF6A4C93),
+                  color: Colors.deepPurple,
                   thickness: 1,
                 ),
               ),
@@ -146,11 +146,11 @@ class _CustomDrawerState extends State<CustomDrawer>
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: _isBubbleOpen 
-                          ? const Color(0xFF6A4C93).withOpacity(0.2)
-                          : const Color(0xFF6A4C93).withOpacity(0.1),
+                          ? Colors.deepPurple.withOpacity(0.2)
+                          : Colors.deepPurple.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFF6A4C93).withOpacity(0.3),
+                        color: Colors.deepPurple.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
@@ -159,14 +159,14 @@ class _CustomDrawerState extends State<CustomDrawer>
                       children: [
                         Icon(
                           _isBubbleOpen ? Icons.close : Icons.more_horiz,
-                          color: const Color(0xFF6A4C93),
+                          color: Colors.deepPurple,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           _isBubbleOpen ? 'Close' : 'More Options',
                           style: TextStyle(
-                            color: const Color(0xFF6A4C93),
+                            color: Colors.deepPurple,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -181,8 +181,8 @@ class _CustomDrawerState extends State<CustomDrawer>
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 child: ListTile(
-                  leading: const Icon(Icons.settings, color: Color(0xFF6A4C93)),
-                  title: const Text('Settings', style: TextStyle(color: Color(0xFF6A4C93))),
+                  leading: const Icon(Icons.settings, color: Colors.deepPurple),
+                  title: const Text('Settings', style: TextStyle(color: Colors.deepPurple)),
                   onTap: () {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -194,8 +194,8 @@ class _CustomDrawerState extends State<CustomDrawer>
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 child: ListTile(
-                  leading: const Icon(Icons.info, color: Color(0xFF6A4C93)),
-                  title: const Text('About', style: TextStyle(color: Color(0xFF6A4C93))),
+                  leading: const Icon(Icons.info, color: Colors.deepPurple),
+                  title: const Text('About', style: TextStyle(color: Colors.deepPurple)),
                   onTap: () {
                     Navigator.pop(context);
                     showAboutDialog(
@@ -226,7 +226,7 @@ class _CustomDrawerState extends State<CustomDrawer>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6A4C93).withOpacity(0.3),
+                          color: Colors.deepPurple.withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                           spreadRadius: 2,
@@ -240,7 +240,7 @@ class _CustomDrawerState extends State<CustomDrawer>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: const BoxDecoration(
-                            color: Color(0xFF6A4C93),
+                            color: Colors.deepPurple,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(20),
                               topRight: Radius.circular(20),
@@ -300,19 +300,19 @@ class _CustomDrawerState extends State<CustomDrawer>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF6A4C93).withOpacity(0.1) : Colors.transparent,
+        color: isSelected ? Colors.deepPurple.withOpacity(0.1) : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         leading: Icon(
           tab['icon'],
-          color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+          color: isSelected ? Colors.deepPurple : Colors.grey[600],
           size: 24,
         ),
         title: Text(
           tab['label'],
           style: TextStyle(
-            color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+            color: isSelected ? Colors.deepPurple : Colors.grey[600],
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 16,
           ),
@@ -339,7 +339,7 @@ class _CustomDrawerState extends State<CustomDrawer>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected 
-              ? const Color(0xFF6A4C93).withOpacity(0.1)
+              ? Colors.deepPurple.withOpacity(0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -349,13 +349,13 @@ class _CustomDrawerState extends State<CustomDrawer>
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? const Color(0xFF6A4C93).withOpacity(0.2)
+                    ? Colors.deepPurple.withOpacity(0.2)
                     : Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 tab['icon'],
-                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+                color: isSelected ? Colors.deepPurple : Colors.grey[600],
                 size: 18,
               ),
             ),
@@ -363,7 +363,7 @@ class _CustomDrawerState extends State<CustomDrawer>
             Text(
               tab['label'],
               style: TextStyle(
-                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[700],
+                color: isSelected ? Colors.deepPurple : Colors.grey[700],
                 fontSize: 15,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
@@ -374,7 +374,7 @@ class _CustomDrawerState extends State<CustomDrawer>
                 width: 8,
                 height: 8,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF6A4C93),
+                  color: Colors.deepPurple,
                   shape: BoxShape.circle,
                 ),
               ),

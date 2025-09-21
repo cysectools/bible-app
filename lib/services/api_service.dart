@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 
 class BibleApi {
-  static const String _baseUrl = 'https://bible-api.com';
-  static const String _esvApiUrl = 'https://api.esv.org/v3/passage/text';
-  static const String _esvApiKey = 'TEST'; // You'll need to get a real API key from ESV.org
+  static const String _baseUrl = 'https://ourmana.com/api';
   
   // Popular Bible verses for different moods
   static final Map<String, List<Map<String, String>>> _moodVerses = {
@@ -59,28 +56,13 @@ class BibleApi {
     ],
   };
 
-  // Get a random verse from the Bible API
+  // Get a random verse from the OurMana API
   static Future<String> getRandomVerse() async {
     try {
-      // List of popular verses to choose from
-      final popularVerses = [
-        'john+3:16',
-        'psalm+23:1',
-        'jeremiah+29:11',
-        'romans+8:28',
-        'philippians+4:13',
-        'proverbs+3:5-6',
-        'isaiah+40:31',
-        'matthew+11:28',
-        'psalm+46:10',
-        'john+14:27',
-      ];
-      
-      final randomVerse = popularVerses[Random().nextInt(popularVerses.length)];
       final response = await http.get(
-        Uri.parse('$_baseUrl/$randomVerse'),
+        Uri.parse('$_baseUrl/random'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -105,14 +87,14 @@ class BibleApi {
     return verses.map((verse) => '${verse['text']} - ${verse['reference']}').toList();
   }
 
-  // Get a specific verse by reference
+  // Get a specific verse by reference using OurMana API
   static Future<String> getVerseByReference(String reference) async {
     try {
       final cleanReference = reference.replaceAll(' ', '+');
       final response = await http.get(
-        Uri.parse('$_baseUrl/$cleanReference'),
+        Uri.parse('$_baseUrl/verse/$cleanReference'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -130,47 +112,76 @@ class BibleApi {
     return 'Unable to fetch verse. Please check your internet connection.';
   }
 
-  // Search for verses containing specific keywords
+  // Search for verses containing specific keywords using OurMana API
   static Future<List<String>> searchVerses(String query) async {
     try {
-      // This is a simplified search - in a real app you'd use a proper Bible search API
-      final allVerses = <String>[];
+      final response = await http.get(
+        Uri.parse('$_baseUrl/search?q=${Uri.encodeComponent(query)}'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
       
-      for (final mood in _moodVerses.values) {
-        for (final verse in mood) {
-          if (verse['text']!.toLowerCase().contains(query.toLowerCase()) ||
-              verse['reference']!.toLowerCase().contains(query.toLowerCase())) {
-            allVerses.add('${verse['text']} - ${verse['reference']}');
-          }
-        }
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> verses = data['verses'] ?? [];
+        
+        return verses.map((verse) {
+          final text = verse['text']?.toString().trim() ?? '';
+          final reference = verse['reference']?.toString() ?? '';
+          return '$text - $reference';
+        }).toList();
       }
-      
-      return allVerses.take(10).toList(); // Limit to 10 results
     } catch (e) {
       print('Error searching verses: $e');
-      return [];
     }
+    
+    // Fallback to local search if API fails
+    final allVerses = <String>[];
+    for (final mood in _moodVerses.values) {
+      for (final verse in mood) {
+        if (verse['text']!.toLowerCase().contains(query.toLowerCase()) ||
+            verse['reference']!.toLowerCase().contains(query.toLowerCase())) {
+          allVerses.add('${verse['text']} - ${verse['reference']}');
+        }
+      }
+    }
+    
+    return allVerses.take(10).toList();
   }
 
-  // Get daily verse (could be enhanced with a real daily verse API)
+  // Get daily verse using OurMana API
   static Future<String> getDailyVerse() async {
     try {
-      // Use current date to get a consistent daily verse
-      final now = DateTime.now();
-      final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+      final response = await http.get(
+        Uri.parse('$_baseUrl/daily'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
       
-      final dailyVerses = [
-        'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life. - John 3:16',
-        'Trust in the Lord with all your heart and lean not on your own understanding. - Proverbs 3:5',
-        'I can do all this through him who gives me strength. - Philippians 4:13',
-        'The Lord is my shepherd, I lack nothing. - Psalm 23:1',
-        'And we know that in all things God works for the good of those who love him. - Romans 8:28',
-      ];
-      
-      return dailyVerses[dayOfYear % dailyVerses.length];
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final text = data['text']?.toString().trim();
+        final reference = data['reference']?.toString();
+        
+        if (text != null && text.isNotEmpty) {
+          return '$text - $reference';
+        }
+      }
     } catch (e) {
-      return 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life. - John 3:16';
+      print('Error fetching daily verse: $e');
     }
+    
+    // Fallback to local daily verses
+    final now = DateTime.now();
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    
+    final dailyVerses = [
+      'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life. - John 3:16',
+      'Trust in the Lord with all your heart and lean not on your own understanding. - Proverbs 3:5',
+      'I can do all this through him who gives me strength. - Philippians 4:13',
+      'The Lord is my shepherd, I lack nothing. - Psalm 23:1',
+      'And we know that in all things God works for the good of those who love him. - Romans 8:28',
+    ];
+    
+    return dailyVerses[dayOfYear % dailyVerses.length];
   }
 
   // Get verse of the day with enhanced formatting

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/memorization_service.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/animated_border_container.dart';
+import '../widgets/custom_drawer.dart';
 import 'auditory_practice_screen.dart'; // 👈 import the auditory practice screen
+import 'main_navigation.dart';
 
 class MemorizationScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab; // 0: Verses, 1: Home, 2: Memorization
@@ -57,127 +60,17 @@ class _MemorizationScreenState extends State<MemorizationScreen>
           ),
         ),
 
-        drawer: Drawer(
-          backgroundColor: Colors.white,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.deepPurple, Colors.indigo],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.school, color: Colors.white, size: 48),
-                    SizedBox(height: 8),
-                    Text(
-                      'Bible App',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Memorization',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ],
-                ),
+        drawer: CustomDrawer(
+          currentScreen: 'Memorization',
+          onNavigate: (index) {
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MainNavigation(initialIndex: index),
               ),
-              ListTile(
-                leading: const Icon(Icons.home, color: Colors.deepPurple),
-                title: const Text('Home',
-                    style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(1);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.menu_book, color: Colors.deepPurple),
-                title: const Text('Verses',
-                    style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(0);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.school, color: Colors.deepPurple),
-                title: const Text('Memorization',
-                    style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(2);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.shield, color: Colors.deepPurple),
-                title: const Text('Armor of God', style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(3);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.note, color: Colors.deepPurple),
-                title: const Text('Notes', style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(4);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.group, color: Colors.deepPurple),
-                title: const Text('Groups', style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(5);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.person, color: Colors.deepPurple),
-                title: const Text('Profile', style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onSelectTab?.call(6);
-                },
-              ),
-              const Divider(color: Colors.deepPurple),
-              ListTile(
-                leading: const Icon(Icons.settings, color: Colors.deepPurple),
-                title: const Text('Settings',
-                    style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Settings coming soon!")),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.info, color: Colors.deepPurple),
-                title: const Text('About',
-                    style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  showAboutDialog(
-                    context: context,
-                    applicationName: 'Bible App',
-                    applicationVersion: '1.0.1',
-                    applicationIcon: const Icon(Icons.book, size: 48),
-                  );
-                },
-              ),
-            ],
-          ),
-        ), // 👈 this was missing
+            );
+          },
+        ),
 
         body: RefreshIndicator(
           onRefresh: _load,
@@ -231,97 +124,91 @@ class _MemorizationScreenState extends State<MemorizationScreen>
                   itemCount: _memorizedVerses.length,
                   itemBuilder: (context, index) {
                     final verse = _memorizedVerses[index];
-                    return Container(
+                    return AnimatedBorderContainer(
                       margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.deepPurple.withOpacity(0.2),
-                          width: 1,
+                      padding: const EdgeInsets.all(20),
+                      borderRadius: 20,
+                      borderColor: Colors.deepPurple,
+                      borderWidth: 2,
+                      backgroundColor: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.deepPurple.withOpacity(0.1),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 5),
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.deepPurple.withOpacity(0.1),
-                            blurRadius: 15,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 5),
+                      ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            verse,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.deepPurple,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AuditoryPracticeScreen(verse: verse),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.volume_up,
+                                    color: Colors.deepPurple),
+                                label: const Text("Listen",
+                                    style:
+                                        TextStyle(color: Colors.deepPurple)),
+                                style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.deepPurple.withOpacity(0.1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton.icon(
+                                onPressed: () async {
+                                  final removed =
+                                      await MemorizationService.remove(verse);
+                                  if (removed) {
+                                    await _load();
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Verse removed from memorization")),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.remove_circle_outline,
+                                    color: Colors.deepPurple),
+                                label: const Text("Remove",
+                                    style:
+                                        TextStyle(color: Colors.deepPurple)),
+                                style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.deepPurple.withOpacity(0.1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              verse,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.deepPurple,
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            AuditoryPracticeScreen(verse: verse),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.volume_up,
-                                      color: Colors.deepPurple),
-                                  label: const Text("Listen",
-                                      style:
-                                          TextStyle(color: Colors.deepPurple)),
-                                  style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.deepPurple.withOpacity(0.1),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                TextButton.icon(
-                                  onPressed: () async {
-                                    final removed =
-                                        await MemorizationService.remove(verse);
-                                    if (removed) {
-                                      await _load();
-                                      if (!mounted) return;
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                "Verse removed from memorization")),
-                                      );
-                                    }
-                                  },
-                                  icon: const Icon(Icons.remove_circle_outline,
-                                      color: Colors.deepPurple),
-                                  label: const Text("Remove",
-                                      style:
-                                          TextStyle(color: Colors.deepPurple)),
-                                  style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.deepPurple.withOpacity(0.1),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
                       ),
                     );
                   },

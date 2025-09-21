@@ -112,11 +112,11 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF6A4C93).withOpacity(0.2),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                          ),
+                        BoxShadow(
+                          color: Colors.deepPurple.withOpacity(0.2),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
                         ],
                       ),
                       child: Column(
@@ -126,7 +126,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF6A4C93),
+                              color: Colors.deepPurple,
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(20),
                                 topRight: Radius.circular(20),
@@ -186,14 +186,14 @@ class _CustomBottomNavState extends State<CustomBottomNav>
           children: [
             Icon(
               tab['icon'],
-              color: isSelected ? const Color(0xFF6A4C93) : Colors.grey,
+              color: isSelected ? Colors.deepPurple : Colors.grey,
               size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               tab['label'],
               style: TextStyle(
-                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey,
+                color: isSelected ? Colors.deepPurple : Colors.grey,
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
@@ -217,13 +217,13 @@ class _CustomBottomNavState extends State<CustomBottomNav>
               height: 40,
               decoration: BoxDecoration(
                 color: _isBubbleOpen 
-                    ? const Color(0xFF6A4C93) 
-                    : const Color(0xFF6A4C93).withOpacity(0.1),
+                    ? Colors.deepPurple 
+                    : Colors.deepPurple.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
                 _isBubbleOpen ? Icons.close : Icons.more_horiz,
-                color: _isBubbleOpen ? Colors.white : const Color(0xFF6A4C93),
+                color: _isBubbleOpen ? Colors.white : Colors.deepPurple,
                 size: 20,
               ),
             ),
@@ -231,7 +231,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
             Text(
               'More',
               style: TextStyle(
-                color: _isBubbleOpen ? const Color(0xFF6A4C93) : Colors.grey,
+                color: _isBubbleOpen ? Colors.deepPurple : Colors.grey,
                 fontSize: 10,
                 fontWeight: _isBubbleOpen ? FontWeight.bold : FontWeight.normal,
               ),
@@ -256,14 +256,14 @@ class _CustomBottomNavState extends State<CustomBottomNav>
           children: [
             Icon(
               tab['icon'],
-              color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+              color: isSelected ? Colors.deepPurple : Colors.grey[600],
               size: 20,
             ),
             const SizedBox(width: 12),
             Text(
               tab['label'],
               style: TextStyle(
-                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+                color: isSelected ? Colors.deepPurple : Colors.grey[600],
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
@@ -274,7 +274,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                 width: 6,
                 height: 6,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF6A4C93),
+                  color: Colors.deepPurple,
                   shape: BoxShape.circle,
                 ),
               ),

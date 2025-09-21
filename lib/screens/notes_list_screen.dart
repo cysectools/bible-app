@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/notes_service.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
 import 'note_editor_screen.dart';
 import 'main_navigation.dart';
@@ -247,19 +248,19 @@ class _NotesListScreenState extends State<NotesListScreen> {
                             itemCount: _filteredNotes.length,
                             itemBuilder: (context, index) {
                               final note = _filteredNotes[index];
-                              return Container(
+                              return AnimatedBorderContainer(
                                 margin: const EdgeInsets.only(bottom: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF6A4C93).withOpacity(0.1),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ],
-                                ),
+                                borderRadius: 20,
+                                borderColor: const Color(0xFF6A4C93),
+                                borderWidth: 2,
+                                backgroundColor: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF6A4C93).withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.all(16),
                                   onTap: () async {
