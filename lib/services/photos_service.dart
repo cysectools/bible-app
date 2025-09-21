@@ -264,23 +264,53 @@ class PhotosService {
   /// Show permission status dialog (for debugging)
   static Future<void> showPermissionStatusDialog(BuildContext context) async {
     final status = await getPermissionStatus();
+    final canSave = await canSaveImages();
+    final canPick = await canPickImages();
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Permission Status (${Platform.isIOS ? 'iOS' : 'Android'})"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: status.entries.map((entry) => 
-            Text("${entry.key}: ${entry.value}")
-          ).toList(),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("📊 Current Permissions:", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ...status.entries.map((entry) => 
+                Text("• ${entry.key}: ${entry.value}")
+              ).toList(),
+              const SizedBox(height: 16),
+              const Text("🔍 Capabilities:", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text("• Can Save Images: ${canSave ? '✅ YES' : '❌ NO'}"),
+              Text("• Can Pick Images: ${canPick ? '✅ YES' : '❌ NO'}"),
+              const SizedBox(height: 16),
+              if (Platform.isIOS) ...[
+                const Text("📱 iOS Explanation:", style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                const Text("• photosAddOnly: Required for saving images"),
+                const Text("• photos: Required for reading images"),
+                const Text("• Private Access = Can read selected photos only"),
+                const Text("• Full Access = Can read all photos AND save new ones"),
+              ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text("OK"),
           ),
+          if (!canSave)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                showPermissionDialog(context);
+              },
+              child: const Text("Fix Permissions"),
+            ),
         ],
       ),
     );
@@ -301,6 +331,49 @@ class PhotosService {
       return status == PermissionStatus.granted;
     }
     return false;
+  }
+
+  /// Get detailed permission analysis for troubleshooting
+  static Future<Map<String, dynamic>> getDetailedPermissionAnalysis() async {
+    final analysis = <String, dynamic>{};
+    
+    if (Platform.isIOS) {
+      final photosAddOnlyStatus = await Permission.photosAddOnly.status;
+      final photosStatus = await Permission.photos.status;
+      
+      analysis['platform'] = 'iOS';
+      analysis['photosAddOnly'] = photosAddOnlyStatus.toString();
+      analysis['photos'] = photosStatus.toString();
+      analysis['canSaveImages'] = photosAddOnlyStatus == PermissionStatus.granted;
+      analysis['canPickImages'] = photosStatus == PermissionStatus.granted || photosStatus == PermissionStatus.limited;
+      
+      // Determine access level
+      if (photosStatus == PermissionStatus.granted && photosAddOnlyStatus == PermissionStatus.granted) {
+        analysis['accessLevel'] = 'Full Access';
+        analysis['explanation'] = 'Your app has full access to photos and can save new images.';
+      } else if (photosStatus == PermissionStatus.limited) {
+        analysis['accessLevel'] = 'Private Access (Limited)';
+        analysis['explanation'] = 'Your app can only read photos you specifically select. It CANNOT save new images to your photo library due to Apple\'s security policy.';
+      } else if (photosStatus == PermissionStatus.denied) {
+        analysis['accessLevel'] = 'No Access';
+        analysis['explanation'] = 'Your app has no access to photos.';
+      } else {
+        analysis['accessLevel'] = 'Unknown';
+        analysis['explanation'] = 'Permission status is unclear.';
+      }
+    } else if (Platform.isAndroid) {
+      final photosStatus = await Permission.photos.status;
+      final storageStatus = await Permission.storage.status;
+      
+      analysis['platform'] = 'Android';
+      analysis['photos'] = photosStatus.toString();
+      analysis['storage'] = storageStatus.toString();
+      analysis['canSaveImages'] = photosStatus == PermissionStatus.granted || storageStatus == PermissionStatus.granted;
+      analysis['canPickImages'] = photosStatus == PermissionStatus.granted;
+      analysis['accessLevel'] = photosStatus == PermissionStatus.granted ? 'Full Access' : 'Limited/No Access';
+    }
+    
+    return analysis;
   }
 
   /// Show alternative save options when full photo access isn't available

@@ -26,7 +26,55 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
   }
 
   Future<void> _checkPermissions() async {
-    await PhotosService.showPermissionStatusDialog(context);
+    // Show detailed permission analysis
+    final analysis = await PhotosService.getDetailedPermissionAnalysis();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("🔍 Permission Analysis (${analysis['platform']})"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("📊 Access Level: ${analysis['accessLevel']}", 
+                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              Text(analysis['explanation'] ?? 'No explanation available.'),
+              const SizedBox(height: 16),
+              const Text("🔧 Technical Details:", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ...analysis.entries.where((entry) => entry.key != 'platform' && entry.key != 'accessLevel' && entry.key != 'explanation').map((entry) => 
+                Text("• ${entry.key}: ${entry.value}")
+              ).toList(),
+              const SizedBox(height: 16),
+              if (analysis['accessLevel'] == 'Private Access (Limited)') ...[
+                const Text("⚠️ Apple Policy Limitation:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                const SizedBox(height: 8),
+                const Text("iOS 'Private Access' is designed for privacy and security. Apps with Private Access can only read photos you specifically select, but cannot save new images to your photo library."),
+                const SizedBox(height: 8),
+                const Text("This is not a bug in your app - it's Apple's security policy working as intended."),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+          if (analysis['accessLevel'] == 'Private Access (Limited)')
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                PhotosService.showPermissionDialog(context);
+              },
+              child: const Text("Try to Fix"),
+            ),
+        ],
+      ),
+    );
   }
 
 
