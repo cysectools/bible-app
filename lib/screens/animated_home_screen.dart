@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'dart:ui';
 import '../widgets/animated_background.dart';
+import '../widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'verse_screen_image.dart';
+import '../services/api_service.dart';
+import 'main_navigation.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab;
@@ -32,13 +34,13 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   void initState() {
     super.initState();
     _initializeAnimations();
-    _loadEmojiPositions();
-    _createEmojis();
+    // Load emoji positions and create emojis asynchronously to avoid blocking UI
+    _loadEmojiPositions().then((_) => _createEmojis());
   }
 
   void _initializeAnimations() {
     _emojiController = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(milliseconds: 1500), // Reduced from 3 seconds
       vsync: this,
     );
 
@@ -47,7 +49,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _emojiController,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOut, // Changed from elasticOut for faster animation
     ));
 
     _emojiController.forward();
@@ -139,54 +141,62 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   }
 
   Future<String> _getMoodSpecificVerse(Mood mood) async {
-    final moodVerses = {
-      Mood.sad: [
-        "The Lord is close to the brokenhearted and saves those who are crushed in spirit. - Psalm 34:18",
-        "Come to me, all you who are weary and burdened, and I will give you rest. - Matthew 11:28",
-        "He heals the brokenhearted and binds up their wounds. - Psalm 147:3",
-        "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
-        "The Lord your God is with you, the Mighty Warrior who saves. - Zephaniah 3:17"
-      ],
-      Mood.happy: [
-        "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24",
-        "Rejoice in the Lord always. I will say it again: Rejoice! - Philippians 4:4",
-        "The joy of the Lord is your strength. - Nehemiah 8:10",
-        "In all things God works for the good of those who love him. - Romans 8:28",
-        "Shout for joy to the Lord, all the earth! - Psalm 100:1"
-      ],
-      Mood.angry: [
-        "Be still before the Lord and wait patiently for him; do not fret when people succeed in their ways. - Psalm 37:7",
-        "A gentle answer turns away wrath, but a harsh word stirs up anger. - Proverbs 15:1",
-        "In your anger do not sin. - Ephesians 4:26",
-        "Love is patient, love is kind. It does not envy, it does not boast, it is not proud. - 1 Corinthians 13:4",
-        "Get rid of all bitterness, rage and anger, brawling and slander. - Ephesians 4:31"
-      ],
-      Mood.anxious: [
-        "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. - Philippians 4:6",
-        "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
-        "Peace I leave with you; my peace I give you. - John 14:27",
-        "When anxiety was great within me, your consolation brought me joy. - Psalm 94:19",
-        "The Lord is my light and my salvation—whom shall I fear? - Psalm 27:1"
-      ],
-      Mood.grateful: [
-        "Give thanks to the Lord, for he is good; his love endures forever. - Psalm 107:1",
-        "In everything give thanks; for this is God's will for you in Christ Jesus. - 1 Thessalonians 5:18",
-        "I will give thanks to you, Lord, with all my heart. - Psalm 9:1",
-        "Let us come before him with thanksgiving. - Psalm 95:2",
-        "Every good and perfect gift is from above. - James 1:17"
-      ],
-      Mood.peaceful: [
-        "Peace I leave with you; my peace I give you. - John 14:27",
-        "The Lord gives strength to his people; the Lord blesses his people with peace. - Psalm 29:11",
-        "You will keep in perfect peace those whose minds are steadfast, because they trust in you. - Isaiah 26:3",
-        "And the peace of God, which transcends all understanding, will guard your hearts and your minds. - Philippians 4:7",
-        "The Lord is my shepherd, I lack nothing. - Psalm 23:1"
-      ]
-    };
+    try {
+      final moodString = mood.toString().split('.').last;
+      final verses = await BibleApi.getVersesByMood(moodString);
+      final random = DateTime.now().millisecondsSinceEpoch % verses.length;
+      return verses[random];
+    } catch (e) {
+      // Fallback to local verses if API fails
+      final moodVerses = {
+        Mood.sad: [
+          "The Lord is close to the brokenhearted and saves those who are crushed in spirit. - Psalm 34:18",
+          "Come to me, all you who are weary and burdened, and I will give you rest. - Matthew 11:28",
+          "He heals the brokenhearted and binds up their wounds. - Psalm 147:3",
+          "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
+          "The Lord your God is with you, the Mighty Warrior who saves. - Zephaniah 3:17"
+        ],
+        Mood.happy: [
+          "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24",
+          "Rejoice in the Lord always. I will say it again: Rejoice! - Philippians 4:4",
+          "The joy of the Lord is your strength. - Nehemiah 8:10",
+          "In all things God works for the good of those who love him. - Romans 8:28",
+          "Shout for joy to the Lord, all the earth! - Psalm 100:1"
+        ],
+        Mood.angry: [
+          "Be still before the Lord and wait patiently for him; do not fret when people succeed in their ways. - Psalm 37:7",
+          "A gentle answer turns away wrath, but a harsh word stirs up anger. - Proverbs 15:1",
+          "In your anger do not sin. - Ephesians 4:26",
+          "Love is patient, love is kind. It does not envy, it does not boast, it is not proud. - 1 Corinthians 13:4",
+          "Get rid of all bitterness, rage and anger, brawling and slander. - Ephesians 4:31"
+        ],
+        Mood.anxious: [
+          "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. - Philippians 4:6",
+          "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
+          "Peace I leave with you; my peace I give you. - John 14:27",
+          "When anxiety was great within me, your consolation brought me joy. - Psalm 94:19",
+          "The Lord is my light and my salvation—whom shall I fear? - Psalm 27:1"
+        ],
+        Mood.grateful: [
+          "Give thanks to the Lord, for he is good; his love endures forever. - Psalm 107:1",
+          "In everything give thanks; for this is God's will for you in Christ Jesus. - 1 Thessalonians 5:18",
+          "I will give thanks to you, Lord, with all my heart. - Psalm 9:1",
+          "Let us come before him with thanksgiving. - Psalm 95:2",
+          "Every good and perfect gift is from above. - James 1:17"
+        ],
+        Mood.peaceful: [
+          "Peace I leave with you; my peace I give you. - John 14:27",
+          "The Lord gives strength to his people; the Lord blesses his people with peace. - Psalm 29:11",
+          "You will keep in perfect peace those whose minds are steadfast, because they trust in you. - Isaiah 26:3",
+          "And the peace of God, which transcends all understanding, will guard your hearts and your minds. - Philippians 4:7",
+          "The Lord is my shepherd, I lack nothing. - Psalm 23:1"
+        ]
+      };
 
-    final verses = moodVerses[mood]!;
-    final random = DateTime.now().millisecondsSinceEpoch % verses.length;
-    return verses[random];
+      final verses = moodVerses[mood]!;
+      final random = DateTime.now().millisecondsSinceEpoch % verses.length;
+      return verses[random];
+    }
   }
 
   void _resetSelection() {
@@ -224,7 +234,17 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             ),
           ),
         ),
-        drawer: _buildDrawer(),
+        drawer: CustomDrawer(
+          currentScreen: 'Home',
+          onNavigate: (index) {
+            Navigator.of(context).pop(); // Close drawer first
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MainNavigation(initialIndex: index),
+              ),
+            );
+          },
+        ),
         body: Stack(
           children: [
             // Main content
@@ -378,112 +398,6 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     );
   }
 
-  Widget _buildDrawer() {
-    return Drawer(
-      backgroundColor: Colors.white,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepPurple, Colors.indigo],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.star, color: Colors.white, size: 48),
-                SizedBox(height: 8),
-                Text(
-                  'Bible App',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Space of Emotions',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home, color: Colors.deepPurple),
-            title: const Text('Home', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(1);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.menu_book, color: Colors.deepPurple),
-            title: const Text('Verses', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(0);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.school, color: Colors.deepPurple),
-            title: const Text('Memorization', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(2);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.shield, color: Colors.deepPurple),
-            title: const Text('Armor of God', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(3);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.note, color: Colors.deepPurple),
-            title: const Text('Notes', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(4);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.group, color: Colors.deepPurple),
-            title: const Text('Groups', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(5);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person, color: Colors.deepPurple),
-            title: const Text('Profile', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onSelectTab?.call(6);
-            },
-          ),
-          const Divider(color: Colors.deepPurple),
-          ListTile(
-            leading: const Icon(Icons.settings, color: Colors.deepPurple),
-            title: const Text('Settings', style: TextStyle(color: Colors.deepPurple)),
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Settings coming soon!")),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class DraggableEmoji extends StatefulWidget {
@@ -512,9 +426,7 @@ class _DraggableEmojiState extends State<DraggableEmoji>
     with TickerProviderStateMixin {
   late Offset _position;
   late AnimationController _floatController;
-  late AnimationController _pulseController;
   late Animation<double> _floatAnimation;
-  late Animation<double> _pulseAnimation;
   bool _isDragging = false;
   bool _showLabel = false;
 
@@ -523,37 +435,24 @@ class _DraggableEmojiState extends State<DraggableEmoji>
     super.initState();
     _position = widget.initialPosition;
     
+    // Simplified to use only one animation controller for better performance
     _floatController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 2000), // Reduced duration
       vsync: this,
     )..repeat(reverse: true);
-    
-    _pulseController = AnimationController(
-      duration: const Duration(seconds: 4),
-      vsync: this,
-    )..repeat();
 
     _floatAnimation = Tween<double>(
-      begin: -8.0,
-      end: 8.0,
+      begin: -5.0, // Reduced movement range
+      end: 5.0,
     ).animate(CurvedAnimation(
       parent: _floatController,
       curve: Curves.easeInOutSine,
-    ));
-
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
     ));
   }
 
   @override
   void dispose() {
     _floatController.dispose();
-    _pulseController.dispose();
     super.dispose();
   }
 
@@ -592,12 +491,12 @@ class _DraggableEmojiState extends State<DraggableEmoji>
         },
         onTap: widget.onTap,
         child: AnimatedBuilder(
-          animation: Listenable.merge([_floatAnimation, _pulseAnimation]),
+          animation: _floatAnimation,
           builder: (context, child) {
             return Transform.translate(
               offset: Offset(0, _isDragging ? 0 : _floatAnimation.value),
               child: Transform.scale(
-                scale: _isDragging ? 1.3 : _pulseAnimation.value,
+                scale: _isDragging ? 1.3 : 1.0, // Removed pulse animation for better performance
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

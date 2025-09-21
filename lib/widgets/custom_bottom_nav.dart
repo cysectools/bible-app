@@ -88,7 +88,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                     child: _buildNavItem(tab),
                   )),
               // Overflow button
-              Container(
+              SizedBox(
                 width: 60,
                 child: _buildOverflowButton(),
               ),

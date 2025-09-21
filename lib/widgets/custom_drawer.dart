@@ -17,7 +17,9 @@ class CustomDrawer extends StatefulWidget {
 class _CustomDrawerState extends State<CustomDrawer>
     with TickerProviderStateMixin {
   late AnimationController _bubbleController;
+  late AnimationController _slideController;
   late Animation<double> _bubbleAnimation;
+  late Animation<Offset> _slideAnimation;
   bool _isBubbleOpen = false;
 
   final List<Map<String, dynamic>> _mainTabs = [
@@ -37,18 +39,32 @@ class _CustomDrawerState extends State<CustomDrawer>
   void initState() {
     super.initState();
     _bubbleController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _slideController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    
     _bubbleAnimation = CurvedAnimation(
       parent: _bubbleController,
-      curve: Curves.easeInOut,
+      curve: Curves.elasticOut,
     );
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeInOut,
+    ));
   }
 
   @override
   void dispose() {
     _bubbleController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
@@ -59,8 +75,10 @@ class _CustomDrawerState extends State<CustomDrawer>
 
     if (_isBubbleOpen) {
       _bubbleController.forward();
+      _slideController.forward();
     } else {
       _bubbleController.reverse();
+      _slideController.reverse();
     }
   }
 
@@ -77,7 +95,7 @@ class _CustomDrawerState extends State<CustomDrawer>
               DrawerHeader(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.deepPurple, Colors.indigo],
+                    colors: [Color(0xFF6A4C93), Color(0xFF4A2C7A)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -107,155 +125,171 @@ class _CustomDrawerState extends State<CustomDrawer>
                 ),
               ),
               
-              // Main tabs
+              // Main tabs (4 tabs above the line)
               ..._mainTabs.map((tab) => _buildMainTabItem(tab)),
               
-              // Overflow section
+              // Divider line
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: const Divider(
+                  color: Color(0xFF6A4C93),
+                  thickness: 1,
+                ),
+              ),
+              
+              // More button
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Divider(color: Colors.deepPurple),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF6A4C93).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                child: GestureDetector(
+                  onTap: _toggleBubble,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: _isBubbleOpen 
+                          ? const Color(0xFF6A4C93).withOpacity(0.2)
+                          : const Color(0xFF6A4C93).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF6A4C93).withOpacity(0.3),
+                        width: 1,
                       ),
-                      child: GestureDetector(
-                        onTap: _toggleBubble,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _isBubbleOpen ? Icons.close : Icons.more_horiz,
-                              color: const Color(0xFF6A4C93),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'More',
-                              style: TextStyle(
-                                color: const Color(0xFF6A4C93),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _isBubbleOpen ? Icons.close : Icons.more_horiz,
+                          color: const Color(0xFF6A4C93),
+                          size: 20,
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _isBubbleOpen ? 'Close' : 'More Options',
+                          style: TextStyle(
+                            color: const Color(0xFF6A4C93),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                    const Expanded(
-                      child: Divider(color: Colors.deepPurple),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               
               // Settings and About
-              ListTile(
-                leading: const Icon(Icons.settings, color: Colors.deepPurple),
-                title: const Text('Settings', style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Settings coming soon!")),
-                  );
-                },
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                child: ListTile(
+                  leading: const Icon(Icons.settings, color: Color(0xFF6A4C93)),
+                  title: const Text('Settings', style: TextStyle(color: Color(0xFF6A4C93))),
+                  onTap: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Settings coming soon!")),
+                    );
+                  },
+                ),
               ),
-              ListTile(
-                leading: const Icon(Icons.info, color: Colors.deepPurple),
-                title: const Text('About', style: TextStyle(color: Colors.deepPurple)),
-                onTap: () {
-                  Navigator.pop(context);
-                  showAboutDialog(
-                    context: context,
-                    applicationName: 'Bible App',
-                    applicationVersion: '1.0.1',
-                    applicationIcon: const Icon(Icons.book, size: 48),
-                  );
-                },
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                child: ListTile(
+                  leading: const Icon(Icons.info, color: Color(0xFF6A4C93)),
+                  title: const Text('About', style: TextStyle(color: Color(0xFF6A4C93))),
+                  onTap: () {
+                    Navigator.pop(context);
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Bible App',
+                      applicationVersion: '1.0.1',
+                      applicationIcon: const Icon(Icons.book, size: 48),
+                    );
+                  },
+                ),
               ),
             ],
           ),
           
           // Floating overflow bubble
-          Positioned(
-            top: 200,
-            right: 20,
-            child: AnimatedBuilder(
-              animation: _bubbleAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _bubbleAnimation.value,
-                  child: Opacity(
-                    opacity: _bubbleAnimation.value,
-                    child: Container(
-                      width: 180,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF6A4C93).withOpacity(0.2),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Bubble header
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF6A4C93),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              ),
+          if (_isBubbleOpen)
+            Positioned(
+              top: 280,
+              left: 20,
+              right: 20,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: ScaleTransition(
+                  scale: _bubbleAnimation,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6A4C93).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Bubble header
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF6A4C93),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
                             ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.more_horiz,
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.apps,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'More Options',
+                                style: TextStyle(
                                   color: Colors.white,
-                                  size: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'More',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: _toggleBubble,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                ),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: _toggleBubble,
                                   child: const Icon(
                                     Icons.close,
                                     color: Colors.white,
                                     size: 16,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          // Overflow tabs
-                          ..._overflowTabs.map((tab) => _buildBubbleItem(tab)),
-                        ],
-                      ),
+                        ),
+                        // Overflow tabs
+                        ..._overflowTabs.map((tab) => _buildBubbleItem(tab)),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -263,22 +297,31 @@ class _CustomDrawerState extends State<CustomDrawer>
 
   Widget _buildMainTabItem(Map<String, dynamic> tab) {
     final isSelected = _isCurrentTab(tab['index']);
-    return ListTile(
-      leading: Icon(
-        tab['icon'],
-        color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFF6A4C93).withOpacity(0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
       ),
-      title: Text(
-        tab['label'],
-        style: TextStyle(
+      child: ListTile(
+        leading: Icon(
+          tab['icon'],
           color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          size: 24,
         ),
+        title: Text(
+          tab['label'],
+          style: TextStyle(
+            color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 16,
+          ),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          widget.onNavigate(tab['index']);
+        },
       ),
-      onTap: () {
-        Navigator.pop(context);
-        widget.onNavigate(tab['index']);
-      },
     );
   }
 
@@ -292,28 +335,44 @@ class _CustomDrawerState extends State<CustomDrawer>
       },
       child: Container(
         width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? const Color(0xFF6A4C93).withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           children: [
-            Icon(
-              tab['icon'],
-              color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
-              size: 18,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? const Color(0xFF6A4C93).withOpacity(0.2)
+                    : Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                tab['icon'],
+                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Text(
               tab['label'],
               style: TextStyle(
-                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[600],
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF6A4C93) : Colors.grey[700],
+                fontSize: 15,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),
             if (isSelected) ...[
               const Spacer(),
               Container(
-                width: 6,
-                height: 6,
+                width: 8,
+                height: 8,
                 decoration: const BoxDecoration(
                   color: Color(0xFF6A4C93),
                   shape: BoxShape.circle,

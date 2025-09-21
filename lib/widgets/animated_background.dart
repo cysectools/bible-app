@@ -101,9 +101,10 @@ class AnimatedBackgroundPainter extends CustomPainter {
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 
-    for (int i = 0; i < 8; i++) {
-      final startX = (lineAnimationValue * 100 + i * 150) % (size.width + 100);
-      final startY = size.height * 0.2 + i * 80;
+    // Reduced from 8 to 4 lines for better performance
+    for (int i = 0; i < 4; i++) {
+      final startX = (lineAnimationValue * 100 + i * 200) % (size.width + 100);
+      final startY = size.height * 0.2 + i * 120;
       final endX = startX + 200;
       final endY = startY + 100;
       
@@ -124,7 +125,8 @@ class AnimatedBackgroundPainter extends CustomPainter {
       ..color = Colors.deepPurple.withOpacity(0.15)
       ..style = PaintingStyle.fill;
 
-    for (int i = 0; i < 30; i++) {
+    // Reduced from 30 to 12 particles for better performance
+    for (int i = 0; i < 12; i++) {
       final x = (random.nextDouble() * size.width + particleAnimationValue * 30) % size.width;
       final y = (random.nextDouble() * size.height + particleAnimationValue * 20) % size.height;
       final radius = random.nextDouble() * 3 + 1;

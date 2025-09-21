@@ -20,6 +20,7 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   late int _currentIndex;
+  final Map<int, Widget> _screenCache = {};
 
   @override
   void initState() {
@@ -27,32 +28,56 @@ class _MainNavigationState extends State<MainNavigation> {
     _currentIndex = widget.initialIndex ?? 1; // Start on Home (middle tab)
   }
 
-  List<Widget> get _screens => [
-  VersesScreen(
-    onSelectTab: (index) => setState(() => _currentIndex = index),
-  ),
-  AnimatedHomeScreen(
-    onSelectTab: (index) => setState(() => _currentIndex = index),
-  ),
-  MemorizationScreen(
-    onSelectTab: (index) => setState(() => _currentIndex = index),
-  ),
-  ArmorOfGodScreen(
-    onSelectTab: (index) => setState(() => _currentIndex = index),
-  ),
-  const NotesListScreen(),
-  const GroupsListScreen(),
-  const ProfileScreen(),
-];
+  Widget _getScreen(int index) {
+    if (_screenCache.containsKey(index)) {
+      return _screenCache[index]!;
+    }
 
+    Widget screen;
+    switch (index) {
+      case 0:
+        screen = VersesScreen(
+          onSelectTab: (index) => setState(() => _currentIndex = index),
+        );
+        break;
+      case 1:
+        screen = AnimatedHomeScreen(
+          onSelectTab: (index) => setState(() => _currentIndex = index),
+        );
+        break;
+      case 2:
+        screen = MemorizationScreen(
+          onSelectTab: (index) => setState(() => _currentIndex = index),
+        );
+        break;
+      case 3:
+        screen = ArmorOfGodScreen(
+          onSelectTab: (index) => setState(() => _currentIndex = index),
+        );
+        break;
+      case 4:
+        screen = const NotesListScreen();
+        break;
+      case 5:
+        screen = const GroupsListScreen();
+        break;
+      case 6:
+        screen = const ProfileScreen();
+        break;
+      default:
+        screen = AnimatedHomeScreen(
+          onSelectTab: (index) => setState(() => _currentIndex = index),
+        );
+    }
+
+    _screenCache[index] = screen;
+    return screen;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: _getScreen(_currentIndex),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),

@@ -233,6 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         drawer: CustomDrawer(
           currentScreen: 'Profile',
           onNavigate: (index) {
+            Navigator.of(context).pop(); // Close drawer first
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => MainNavigation(initialIndex: index),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'main_navigation.dart';
+import '../utils/performance_monitor.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,19 +24,19 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Initialize animation controllers
+    // Initialize animation controllers (reduced durations for faster launch)
     _swirlController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -67,9 +68,11 @@ class _SplashScreenState extends State<SplashScreen>
     // Start animations
     _startAnimations();
 
-    // Wait for animations to complete then navigate
-    Future.delayed(const Duration(milliseconds: 3000), () {
+    // Wait for animations to complete then navigate (reduced from 3000ms to 1500ms)
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
+        PerformanceMonitor.endTimer('app_launch');
+        PerformanceMonitor.logLaunchTime();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MainNavigation()),
