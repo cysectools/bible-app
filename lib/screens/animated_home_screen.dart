@@ -238,7 +238,8 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
           currentScreen: 'Home',
           onNavigate: (index) {
             Navigator.of(context).pop(); // Close drawer first
-            Navigator.of(context).pushReplacement(
+            // Use push instead of pushReplacement to avoid navigation errors
+            Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => MainNavigation(initialIndex: index),
               ),
