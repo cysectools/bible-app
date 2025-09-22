@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
+import '../widgets/animated_button.dart';
 import 'armor_of_god_practice.dart';
 import 'main_navigation.dart';
 
@@ -197,7 +198,7 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                       ],
                     ),
                   ),
-                  ElevatedButton.icon(
+                  AnimatedElevatedButtonIcon(
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (context) => ArmorOfGodPracticeScreen()),
@@ -211,6 +212,10 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
                       ),
                       elevation: 8,
                     ),

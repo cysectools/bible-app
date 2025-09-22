@@ -6,9 +6,9 @@ import '../widgets/custom_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'verse_screen_image.dart';
-import '../services/api_service.dart';
 import '../services/streaks_service.dart';
 import '../services/verses_service.dart';
+import '../services/smart_verse_service.dart';
 import 'main_navigation.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
@@ -38,8 +38,10 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   void initState() {
     super.initState();
     _initializeAnimations();
-    // Load emoji positions and create emojis asynchronously to avoid blocking UI
-    _loadEmojiPositions().then((_) => _createEmojis());
+    // Initialize smart verse service and load emoji positions
+    SmartVerseService.initialize().then((_) {
+      _loadEmojiPositions().then((_) => _createEmojis());
+    });
   }
 
   void _initializeAnimations() {
@@ -97,6 +99,12 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       {"emoji": "😌", "mood": Mood.peaceful, "label": "Peaceful"},
     ];
 
+    // If no saved positions exist, create perfect circle and enable OCD mode
+    if (_emojiPositions.isEmpty) {
+      _ocdMode = true;
+      _createPerfectCirclePositions(emojiData.length);
+    }
+
     for (int i = 0; i < emojiData.length; i++) {
       final emojiKey = emojiData[i]["emoji"] as String;
       final savedPosition = _emojiPositions[emojiKey];
@@ -120,6 +128,41 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
         },
       ));
     }
+    
+    print('Created ${_emojis.length} emojis');
+    setState(() {}); // Force rebuild to show emojis
+  }
+
+  void _createPerfectCirclePositions(int emojiCount) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Center of the screen
+    final centerX = screenWidth / 2;
+    final centerY = screenHeight / 2;
+    
+    // Radius for the circle (adjust based on screen size)
+    final radius = math.min(screenWidth, screenHeight) * 0.25;
+    
+    final emojiData = [
+      {"emoji": "😢", "mood": Mood.sad, "label": "Sad"},
+      {"emoji": "😊", "mood": Mood.happy, "label": "Happy"},
+      {"emoji": "😠", "mood": Mood.angry, "label": "Angry"},
+      {"emoji": "😰", "mood": Mood.anxious, "label": "Anxious"},
+      {"emoji": "🙏", "mood": Mood.grateful, "label": "Grateful"},
+      {"emoji": "😌", "mood": Mood.peaceful, "label": "Peaceful"},
+    ];
+    
+    for (int i = 0; i < emojiCount; i++) {
+      final angle = (2 * math.pi * i) / emojiCount - math.pi / 2; // Start from top
+      final x = centerX + radius * math.cos(angle);
+      final y = centerY + radius * math.sin(angle);
+      
+      _emojiPositions[emojiData[i]["emoji"] as String] = Offset(x, y);
+    }
+    
+    // Save the perfect circle positions
+    _saveEmojiPositions();
   }
 
   Future<void> _selectMood(Mood mood) async {
@@ -154,59 +197,11 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   Future<String> _getMoodSpecificVerse(Mood mood) async {
     try {
       final moodString = mood.toString().split('.').last;
-      final verses = await BibleApi.getVersesByMood(moodString);
-      final random = DateTime.now().millisecondsSinceEpoch % verses.length;
-      return verses[random];
+      return await SmartVerseService.getVerseForMood(moodString);
     } catch (e) {
-      // Fallback to local verses if API fails
-      final moodVerses = {
-        Mood.sad: [
-          "The Lord is close to the brokenhearted and saves those who are crushed in spirit. - Psalm 34:18",
-          "Come to me, all you who are weary and burdened, and I will give you rest. - Matthew 11:28",
-          "He heals the brokenhearted and binds up their wounds. - Psalm 147:3",
-          "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
-          "The Lord your God is with you, the Mighty Warrior who saves. - Zephaniah 3:17"
-        ],
-        Mood.happy: [
-          "This is the day the Lord has made; let us rejoice and be glad in it. - Psalm 118:24",
-          "Rejoice in the Lord always. I will say it again: Rejoice! - Philippians 4:4",
-          "The joy of the Lord is your strength. - Nehemiah 8:10",
-          "In all things God works for the good of those who love him. - Romans 8:28",
-          "Shout for joy to the Lord, all the earth! - Psalm 100:1"
-        ],
-        Mood.angry: [
-          "Be still before the Lord and wait patiently for him; do not fret when people succeed in their ways. - Psalm 37:7",
-          "A gentle answer turns away wrath, but a harsh word stirs up anger. - Proverbs 15:1",
-          "In your anger do not sin. - Ephesians 4:26",
-          "Love is patient, love is kind. It does not envy, it does not boast, it is not proud. - 1 Corinthians 13:4",
-          "Get rid of all bitterness, rage and anger, brawling and slander. - Ephesians 4:31"
-        ],
-        Mood.anxious: [
-          "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. - Philippians 4:6",
-          "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
-          "Peace I leave with you; my peace I give you. - John 14:27",
-          "When anxiety was great within me, your consolation brought me joy. - Psalm 94:19",
-          "The Lord is my light and my salvation—whom shall I fear? - Psalm 27:1"
-        ],
-        Mood.grateful: [
-          "Give thanks to the Lord, for he is good; his love endures forever. - Psalm 107:1",
-          "In everything give thanks; for this is God's will for you in Christ Jesus. - 1 Thessalonians 5:18",
-          "I will give thanks to you, Lord, with all my heart. - Psalm 9:1",
-          "Let us come before him with thanksgiving. - Psalm 95:2",
-          "Every good and perfect gift is from above. - James 1:17"
-        ],
-        Mood.peaceful: [
-          "Peace I leave with you; my peace I give you. - John 14:27",
-          "The Lord gives strength to his people; the Lord blesses his people with peace. - Psalm 29:11",
-          "You will keep in perfect peace those whose minds are steadfast, because they trust in you. - Isaiah 26:3",
-          "And the peace of God, which transcends all understanding, will guard your hearts and your minds. - Philippians 4:7",
-          "The Lord is my shepherd, I lack nothing. - Psalm 23:1"
-        ]
-      };
-
-      final verses = moodVerses[mood]!;
-      final random = DateTime.now().millisecondsSinceEpoch % verses.length;
-      return verses[random];
+      print('Error getting mood-specific verse: $e');
+      // Ultimate fallback
+      return "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life. - John 3:16";
     }
   }
 
@@ -513,6 +508,49 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         label: const Text("Save as Image"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("🔄 Refreshing verse cache..."),
+                              backgroundColor: Colors.blue,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          
+                          await SmartVerseService.forceRefresh();
+                          
+                          // Load a new verse with the refreshed cache
+                          if (_currentMood != null) {
+                            try {
+                              setState(() => _currentVerse = "Loading fresh verse...");
+                              final verse = await _getMoodSpecificVerse(_currentMood!);
+                              setState(() => _currentVerse = verse);
+                            } catch (e) {
+                              setState(() => _currentVerse = "Error loading fresh verse: $e");
+                            }
+                          }
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("✅ Verse cache refreshed! Fresh verses loaded."),
+                              backgroundColor: Colors.green,
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.cloud_download, color: Colors.white),
+                        label: const Text("Refresh Cache"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(

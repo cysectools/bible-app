@@ -41,6 +41,7 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
   int _totalCorrectAnswers = 0;
   bool _hasUnlockedThemes = false;
   bool _hasUnlockedBadges = false;
+  
 
   // Armor of God data
   final List<Map<String, String>> _armorPieces = [
@@ -299,7 +300,12 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
             );
           },
         ),
-        body: _showAdvice ? _buildPracticeDisplay() : _buildArmorGrid(),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: _showAdvice ? _buildPracticeDisplay() : _buildArmorGrid(),
+          ),
+        ),
       ),
     );
   }
@@ -913,54 +919,29 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
         
         const SizedBox(height: 20),
         
-        // Action buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        // Action buttons with popup menu
+        Column(
           children: [
-            // Hint button
-            ElevatedButton.icon(
-              onPressed: _hintsUsed < _currentWords.length ? _revealHint : null,
-              icon: const Icon(Icons.lightbulb_outline, size: 20),
-              label: Text("Hint ($_hintsUsed/${_currentWords.length})"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            
-            // Check button
-            ElevatedButton.icon(
-              onPressed: _checkWriting,
-              icon: const Icon(Icons.check, size: 20),
-              label: const Text("Check"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            // Main action button that opens popup
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  _showActionMenu(context);
+                },
+                icon: const Icon(Icons.more_horiz, color: Colors.white),
+                label: const Text("Actions"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
           ],
-        ),
-        
-        const SizedBox(height: 12),
-        
-        // Show answer button
-        TextButton.icon(
-          onPressed: () {
-            _writingController.text = _currentArmorText;
-          },
-          icon: const Icon(Icons.visibility, color: Colors.deepPurple),
-          label: const Text(
-            "Show Full Answer",
-            style: TextStyle(color: Colors.deepPurple),
-          ),
         ),
       ],
     );
@@ -1008,4 +989,123 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
       ),
     );
   }
+
+  void _showActionMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: const Text(
+                'Practice Actions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+            ),
+            
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  // Hint button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        if (_hintsUsed < _currentWords.length) {
+                          _revealHint();
+                        }
+                      },
+                      icon: const Icon(Icons.lightbulb_outline, size: 20),
+                      label: Text("Hint ($_hintsUsed/${_currentWords.length})"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Check button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _checkWriting();
+                      },
+                      icon: const Icon(Icons.check, size: 20),
+                      label: const Text("Check Answer"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Show answer button
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _writingController.text = _currentArmorText;
+                      },
+                      icon: const Icon(Icons.visibility, color: Colors.deepPurple),
+                      label: const Text(
+                        "Show Full Answer",
+                        style: TextStyle(color: Colors.deepPurple),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }
