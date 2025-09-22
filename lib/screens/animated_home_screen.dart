@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'verse_screen_image.dart';
 import '../services/api_service.dart';
 import '../services/streaks_service.dart';
+import '../services/verses_service.dart';
 import 'main_navigation.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
@@ -469,6 +470,38 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         ),
                       ),
                       ElevatedButton.icon(
+                        onPressed: () async {
+                          final success = await VersesService.add(_currentVerse);
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("✅ Verse added to your collection!"),
+                                backgroundColor: Colors.green,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("⚠️ Verse already exists in your collection"),
+                                backgroundColor: Colors.orange,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.bookmark_add, color: Colors.white),
+                        label: const Text("Add to Verses"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      ElevatedButton.icon(
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -477,7 +510,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                           );
                         },
                         icon: const Icon(Icons.image, color: Colors.white),
-                        label: const Text("Save"),
+                        label: const Text("Save as Image"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           foregroundColor: Colors.white,

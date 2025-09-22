@@ -30,6 +30,17 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
   String _currentMode = "listen"; // "listen" or "write"
   final TextEditingController _writingController = TextEditingController();
   String _currentArmorText = "";
+  
+  // Hints system
+  List<String> _currentWords = [];
+  List<bool> _revealedWords = [];
+  int _hintsUsed = 0;
+  
+  // Gamification
+  int _userPoints = 0;
+  int _totalCorrectAnswers = 0;
+  bool _hasUnlockedThemes = false;
+  bool _hasUnlockedBadges = false;
 
   // Armor of God data
   final List<Map<String, String>> _armorPieces = [
@@ -123,6 +134,14 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
     await _flutterTts.setSpeechRate(1.0);
     await _flutterTts.setVolume(1.0);
     
+    // Configure TTS to work with both bluetooth and regular audio
+    await _flutterTts.setSharedInstance(true);
+    await _flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [
+      IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+      IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+      IosTextToSpeechAudioCategoryOptions.mixWithOthers
+    ]);
+    
     _flutterTts.setCompletionHandler(() {
       setState(() {
         _isPlaying = false;
@@ -137,6 +156,11 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
       _currentArmorText = fullText;
       _showAdvice = true;
       _writingController.clear();
+      
+      // Initialize hints system
+      _currentWords = fullText.split(' ');
+      _revealedWords = List.filled(_currentWords.length, false);
+      _hintsUsed = 0;
     });
   }
 
@@ -146,7 +170,56 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
       _currentArmorPiece = "";
       _currentArmorText = "";
       _writingController.clear();
+      _currentWords.clear();
+      _revealedWords.clear();
+      _hintsUsed = 0;
     });
+  }
+
+  void _revealHint() {
+    if (_hintsUsed < _currentWords.length) {
+      setState(() {
+        _revealedWords[_hintsUsed] = true;
+        _hintsUsed++;
+      });
+    }
+  }
+
+  void _checkWriting() {
+    final userText = _writingController.text.toLowerCase().trim();
+    final correctText = _currentArmorText.toLowerCase().trim();
+    
+    if (userText == correctText) {
+      // Award points for correct answer without hints
+      final pointsEarned = _hintsUsed == 0 ? 5 : 2; // 5 points if no hints, 2 if hints used
+      setState(() {
+        _userPoints += pointsEarned;
+        _totalCorrectAnswers++;
+        
+        // Check for unlocks
+        if (_userPoints >= 500 && !_hasUnlockedThemes) {
+          _hasUnlockedThemes = true;
+        }
+        if (_userPoints >= 1000 && !_hasUnlockedBadges) {
+          _hasUnlockedBadges = true;
+        }
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("🎉 Perfect! You earned $pointsEarned points! Total: $_userPoints"),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Keep trying! You're getting closer!"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   Future<void> _speak() async {
@@ -186,26 +259,6 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
     setState(() {});
   }
 
-  void _checkWriting() {
-    final userText = _writingController.text.toLowerCase().trim();
-    final correctText = _currentArmorText.toLowerCase().trim();
-    
-    if (userText == correctText) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("🎉 Perfect! You got it right!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Keep trying! You're getting closer!"),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
 
   @override
   void dispose() {
@@ -383,24 +436,26 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  verse,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.9),
-                    fontStyle: FontStyle.italic,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 2,
-                        color: Colors.black54,
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      verse,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.9),
+                        fontStyle: FontStyle.italic,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 2,
+                            color: Colors.black54,
+                          ),
+                        ],
                       ),
-                    ],
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -411,10 +466,94 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
   }
 
   Widget _buildPracticeDisplay() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
+          // Points display
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.deepPurple.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "$_userPoints",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const Text(
+                      "Points",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      "$_totalCorrectAnswers",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const Text(
+                      "Correct",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+                if (_hasUnlockedThemes)
+                  const Column(
+                    children: [
+                      Icon(Icons.palette, color: Colors.green, size: 24),
+                      Text(
+                        "Themes",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (_hasUnlockedBadges)
+                  const Column(
+                    children: [
+                      Icon(Icons.emoji_events, color: Colors.orange, size: 24),
+                      Text(
+                        "Badges",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
           // Mode selector
           Container(
             padding: const EdgeInsets.all(16),
@@ -438,28 +577,27 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
           const SizedBox(height: 20),
           
           // Main practice area
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.deepPurple.withOpacity(0.3),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.deepPurple.withOpacity(0.2),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+          Container(
+            width: double.infinity,
+            height: 500, // Fixed height to make it scrollable
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.deepPurple.withOpacity(0.3),
+                width: 2,
               ),
-              child: _currentMode == "listen" ? _buildListenMode() : _buildWriteMode(),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.deepPurple.withOpacity(0.2),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
+            child: _currentMode == "listen" ? _buildListenMode() : _buildWriteMode(),
           ),
           
           const SizedBox(height: 20),
@@ -688,10 +826,59 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
           ),
           textAlign: TextAlign.center,
         ),
+        
+        // Hints display
+        if (_currentWords.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Wrap(
+              children: _currentWords.asMap().entries.map((entry) {
+                final index = entry.key;
+                final word = entry.value;
+                final isRevealed = _revealedWords[index];
+                
+                return Container(
+                  margin: const EdgeInsets.all(2),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isRevealed 
+                        ? Colors.deepPurple.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isRevealed 
+                          ? Colors.deepPurple.withOpacity(0.5)
+                          : Colors.grey.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    isRevealed ? word : "___",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isRevealed 
+                          ? Colors.deepPurple
+                          : Colors.grey,
+                      fontWeight: isRevealed 
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+        
         const SizedBox(height: 20),
         
-        // Writing area
-        Expanded(
+        // Writing area - now scrollable
+        SizedBox(
+          height: 200, // Fixed height to make it scrollable
           child: TextField(
             controller: _writingController,
             maxLines: null,
@@ -726,19 +913,40 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
         
         const SizedBox(height: 20),
         
-        // Check button
-        ElevatedButton.icon(
-          onPressed: _checkWriting,
-          icon: const Icon(Icons.check, size: 24),
-          label: const Text("Check Answer"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+        // Action buttons
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Hint button
+            ElevatedButton.icon(
+              onPressed: _hintsUsed < _currentWords.length ? _revealHint : null,
+              icon: const Icon(Icons.lightbulb_outline, size: 20),
+              label: Text("Hint ($_hintsUsed/${_currentWords.length})"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
-          ),
+            
+            // Check button
+            ElevatedButton.icon(
+              onPressed: _checkWriting,
+              icon: const Icon(Icons.check, size: 20),
+              label: const Text("Check"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
         ),
         
         const SizedBox(height: 12),
@@ -750,7 +958,7 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
           },
           icon: const Icon(Icons.visibility, color: Colors.deepPurple),
           label: const Text(
-            "Show Answer",
+            "Show Full Answer",
             style: TextStyle(color: Colors.deepPurple),
           ),
         ),

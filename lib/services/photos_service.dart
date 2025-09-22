@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -171,17 +171,25 @@ class PhotosService {
         return false;
       }
 
-      final result = await ImageGallerySaver.saveImage(
-        imageBytes,
-        name: fileName ?? "bible_verse_${DateTime.now().millisecondsSinceEpoch}",
-        quality: 90,
-      );
+      // Save to temporary file first
+      final tempDir = await getTemporaryDirectory();
+      final finalFileName = fileName ?? "bible_verse_${DateTime.now().millisecondsSinceEpoch}.png";
+      final tempFile = File('${tempDir.path}/$finalFileName');
+      await tempFile.writeAsBytes(imageBytes);
 
-      if (result['isSuccess'] == true) {
+      // Save to gallery using gallery_saver
+      final result = await GallerySaver.saveImage(tempFile.path);
+
+      // Clean up temporary file
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+
+      if (result == true) {
         print("✅ Image saved to gallery successfully");
         return true;
       } else {
-        print("❌ Failed to save image to gallery: ${result['errorMessage']}");
+        print("❌ Failed to save image to gallery");
         return false;
       }
     } catch (e) {

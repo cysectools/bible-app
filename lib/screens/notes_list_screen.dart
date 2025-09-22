@@ -249,20 +249,42 @@ class _NotesListScreenState extends State<NotesListScreen> {
                             itemBuilder: (context, index) {
                               final note = _filteredNotes[index];
                               return AnimatedBorderContainer(
-                                margin: const EdgeInsets.only(bottom: 12),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.all(20),
                                 borderRadius: 20,
-                                borderColor: const Color(0xFF6A4C93),
-                                borderWidth: 2,
+                                borderColor: const Color(0xFF9E9E9E),
+                                borderWidth: 3,
                                 backgroundColor: Colors.transparent,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF6A4C93).withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
+                                    color: const Color(0xFF9E9E9E).withOpacity(0.2),
+                                    blurRadius: 15,
+                                    spreadRadius: 4,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                  BoxShadow(
+                                    color: const Color(0xFFE0E0E0).withOpacity(0.1),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.05),
+                                    blurRadius: 5,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 1),
                                   ),
                                 ],
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.all(16),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.5),
+                                      width: 2.5,
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(16),
                                   onTap: () async {
                                     final result = await Navigator.push(
                                       context,
@@ -295,39 +317,43 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 4),
-                                      Text(
-                                        note.verseText,
-                                        style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
-                                          fontSize: 14,
-                                          fontStyle: FontStyle.italic,
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(1, 1),
-                                              blurRadius: 2,
-                                              color: Colors.black54,
+                                      Flexible(
+                                        child: SingleChildScrollView(
+                                          child: Text(
+                                            note.verseText,
+                                            style: TextStyle(
+                                              color: Colors.white.withOpacity(0.9),
+                                              fontSize: 14,
+                                              fontStyle: FontStyle.italic,
+                                              shadows: [
+                                                Shadow(
+                                                  offset: Offset(1, 1),
+                                                  blurRadius: 2,
+                                                  color: Colors.black54,
+                                                ),
+                                              ],
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 8),
-                                      Text(
-                                        note.content,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(1, 1),
-                                              blurRadius: 2,
-                                              color: Colors.black54,
+                                      Flexible(
+                                        child: SingleChildScrollView(
+                                          child: Text(
+                                            note.content,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              shadows: [
+                                                Shadow(
+                                                  offset: Offset(1, 1),
+                                                  blurRadius: 2,
+                                                  color: Colors.black54,
+                                                ),
+                                              ],
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
@@ -385,6 +411,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                     ],
                                   ),
                                 ),
+                              ),
                               );
                             },
                           ),

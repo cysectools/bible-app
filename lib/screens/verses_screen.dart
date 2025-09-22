@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/memorization_service.dart';
+import '../services/verses_service.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
@@ -19,6 +20,20 @@ class _VersesScreenState extends State<VersesScreen> {
   final List<String> _verses = [];
   bool _isLoading = false;
 
+  // Method to add a verse from external sources
+  void addVerse(String verse) {
+    if (!_verses.contains(verse)) {
+      setState(() {
+        _verses.insert(0, verse); // Add to beginning of list
+      });
+    }
+  }
+
+  // Method to refresh verses from storage
+  Future<void> _refreshVerses() async {
+    await _fetchInitial();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -29,14 +44,26 @@ class _VersesScreenState extends State<VersesScreen> {
     setState(() => _isLoading = true);
     
     try {
-      // Try to get a random verse from API
-      final randomVerse = await BibleApi.getRandomVerse();
-      setState(() {
-        _verses
-          ..clear()
-          ..add(randomVerse);
-        _isLoading = false;
-      });
+      // Load saved verses first
+      final savedVerses = await VersesService.getAll();
+      
+      if (savedVerses.isNotEmpty) {
+        setState(() {
+          _verses
+            ..clear()
+            ..addAll(savedVerses);
+          _isLoading = false;
+        });
+      } else {
+        // If no saved verses, try to get a random verse from API
+        final randomVerse = await BibleApi.getRandomVerse();
+        setState(() {
+          _verses
+            ..clear()
+            ..add(randomVerse);
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       // Fallback to local verses if API fails
       final List<String> localVerses = [
@@ -166,10 +193,12 @@ class _VersesScreenState extends State<VersesScreen> {
                           ],
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: _filteredVerses.length,
-                        itemBuilder: (context, index) {
+                    : RefreshIndicator(
+                        onRefresh: _refreshVerses,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: _filteredVerses.length,
+                          itemBuilder: (context, index) {
                           return AnimatedBorderContainer(
                             margin: const EdgeInsets.only(bottom: 16),
                             padding: const EdgeInsets.all(20),
@@ -269,6 +298,7 @@ class _VersesScreenState extends State<VersesScreen> {
                             ),
                           );
                         },
+                        ),
                       ),
               ),
           ],

@@ -26,6 +26,16 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
   String _currentVerse = "";
   List<String> _verseLines = [];
   int? _selectedLineIndex;
+  
+  // Drag and drop practice
+  String _currentMode = "listen"; // "listen" or "drag"
+  List<String> _shuffledWords = [];
+  List<String> _correctOrder = [];
+  List<String> _userOrder = [];
+  int _userPoints = 0;
+  int _totalCorrectAnswers = 0;
+  bool _hasUnlockedThemes = false;
+  bool _hasUnlockedBadges = false;
 
   @override
   void initState() {
@@ -59,12 +69,84 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
     }
   }
 
+  void _initializeDragDrop() {
+    // Split verse into meaningful chunks (phrases, not individual words)
+    final words = _currentVerse.split(' ');
+    _correctOrder = [];
+    _shuffledWords = [];
+    _userOrder = [];
+    
+    // Create meaningful chunks (2-4 words each)
+    for (int i = 0; i < words.length; i += 3) {
+      final chunk = words.skip(i).take(3).join(' ');
+      if (chunk.trim().isNotEmpty) {
+        _correctOrder.add(chunk.trim());
+      }
+    }
+    
+    // Shuffle for drag and drop
+    _shuffledWords = List.from(_correctOrder)..shuffle();
+  }
+
+  void _checkDragDropOrder() {
+    if (_userOrder.length == _correctOrder.length) {
+      bool isCorrect = true;
+      for (int i = 0; i < _userOrder.length; i++) {
+        if (_userOrder[i] != _correctOrder[i]) {
+          isCorrect = false;
+          break;
+        }
+      }
+      
+      if (isCorrect) {
+        setState(() {
+          _userPoints += 5;
+          _totalCorrectAnswers++;
+          
+          // Check for unlocks
+          if (_userPoints >= 500 && !_hasUnlockedThemes) {
+            _hasUnlockedThemes = true;
+          }
+          if (_userPoints >= 1000 && !_hasUnlockedBadges) {
+            _hasUnlockedBadges = true;
+          }
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("🎉 Perfect! You earned 5 points! Total: $_userPoints"),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        
+        // Reset for next round
+        _initializeDragDrop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Keep trying! You're getting closer!"),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
   void _initializeTts() async {
     _flutterTts = FlutterTts();
     
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setSpeechRate(1.0);
     await _flutterTts.setVolume(1.0);
+    
+    // Configure TTS to work with both bluetooth and regular audio
+    await _flutterTts.setSharedInstance(true);
+    await _flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [
+      IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+      IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+      IosTextToSpeechAudioCategoryOptions.mixWithOthers
+    ]);
     
     _flutterTts.setCompletionHandler(() {
       setState(() {
@@ -174,6 +256,112 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
             children: [
               const SizedBox(height: 20),
               
+              // Points display
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.deepPurple.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          "$_userPoints",
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const Text(
+                          "Points",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          "$_totalCorrectAnswers",
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const Text(
+                          "Correct",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_hasUnlockedThemes)
+                      const Column(
+                        children: [
+                          Icon(Icons.palette, color: Colors.green, size: 24),
+                          Text(
+                            "Themes",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (_hasUnlockedBadges)
+                      const Column(
+                        children: [
+                          Icon(Icons.emoji_events, color: Colors.orange, size: 24),
+                          Text(
+                            "Badges",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Mode selector
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.deepPurple.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildModeButton("Listen", "listen", Icons.volume_up),
+                    _buildModeButton("Drag & Drop", "drag", Icons.drag_indicator),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
               // Verse display
               Expanded(
                 flex: 3,
@@ -196,103 +384,7 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                       ),
                     ],
                   ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.volume_up,
-                        size: 48,
-                        color: Colors.deepPurple.withOpacity(0.7),
-                      ),
-                      const SizedBox(height: 20),
-                      // Scrollable verse lines
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: _verseLines.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final line = entry.value;
-                              final isSelected = _selectedLineIndex == index;
-                              
-                              return GestureDetector(
-                                onTap: () => _speakLine(index),
-                                child: Container(
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected 
-                                        ? Colors.deepPurple.withOpacity(0.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isSelected 
-                                          ? Colors.deepPurple.withOpacity(0.3)
-                                          : Colors.transparent,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      // Line number indicator
-                                      Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          color: isSelected 
-                                              ? Colors.deepPurple
-                                              : Colors.deepPurple.withOpacity(0.3),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '${index + 1}',
-                                            style: TextStyle(
-                                              color: isSelected 
-                                                  ? Colors.white
-                                                  : Colors.deepPurple,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      // Line text
-                                      Expanded(
-                                        child: Text(
-                                          line,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.deepPurple,
-                                            height: 1.4,
-                                            fontWeight: isSelected 
-                                                ? FontWeight.w600
-                                                : FontWeight.normal,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                      ),
-                                      // Play icon for the line
-                                      Icon(
-                                        Icons.volume_up,
-                                        size: 20,
-                                        color: isSelected 
-                                            ? Colors.deepPurple
-                                            : Colors.deepPurple.withOpacity(0.5),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _currentMode == "listen" ? _buildListenMode() : _buildDragDropMode(),
                 ),
               ),
               
@@ -488,6 +580,349 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildModeButton(String label, String mode, IconData icon) {
+    final isSelected = _currentMode == mode;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentMode = mode;
+          if (mode == "drag") {
+            _initializeDragDrop();
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? Colors.deepPurple 
+              : Colors.deepPurple.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.deepPurple.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                  ? Colors.white 
+                  : Colors.deepPurple,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected 
+                    ? Colors.white 
+                    : Colors.deepPurple,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListenMode() {
+    return Column(
+      children: [
+        Icon(
+          Icons.volume_up,
+          size: 48,
+          color: Colors.deepPurple.withOpacity(0.7),
+        ),
+        const SizedBox(height: 20),
+        // Scrollable verse lines
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: _verseLines.asMap().entries.map((entry) {
+                final index = entry.key;
+                final line = entry.value;
+                final isSelected = _selectedLineIndex == index;
+                
+                return GestureDetector(
+                  onTap: () => _speakLine(index),
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected 
+                          ? Colors.deepPurple.withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected 
+                            ? Colors.deepPurple.withOpacity(0.3)
+                            : Colors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Line number indicator
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: isSelected 
+                                ? Colors.deepPurple
+                                : Colors.deepPurple.withOpacity(0.3),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                color: isSelected 
+                                    ? Colors.white
+                                    : Colors.deepPurple,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Line text
+                        Expanded(
+                          child: Text(
+                            line,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.deepPurple,
+                              height: 1.4,
+                              fontWeight: isSelected 
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        // Play icon for the line
+                        Icon(
+                          Icons.volume_up,
+                          size: 20,
+                          color: isSelected 
+                              ? Colors.deepPurple
+                              : Colors.deepPurple.withOpacity(0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDragDropMode() {
+    return Column(
+      children: [
+        Icon(
+          Icons.drag_indicator,
+          size: 48,
+          color: Colors.deepPurple.withOpacity(0.7),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          "Drag the phrases to put them in the correct order:",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.deepPurple.withOpacity(0.8),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+        
+        // User's current order
+        DragTarget<String>(
+          onAccept: (data) {
+            setState(() {
+              _userOrder.add(data);
+              _shuffledWords.remove(data);
+            });
+          },
+          builder: (context, candidateData, rejectedData) {
+            return Container(
+              width: double.infinity,
+              height: 120,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: candidateData.isNotEmpty
+                    ? Colors.deepPurple.withOpacity(0.1)
+                    : Colors.deepPurple.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: candidateData.isNotEmpty
+                      ? Colors.deepPurple
+                      : Colors.deepPurple.withOpacity(0.2),
+                  width: 2,
+                ),
+              ),
+              child: _userOrder.isEmpty
+                  ? Center(
+                      child: Text(
+                        "Drop phrases here in order...",
+                        style: TextStyle(
+                          color: Colors.deepPurple.withOpacity(0.5),
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : Wrap(
+                      children: _userOrder.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final phrase = entry.value;
+                        return Draggable<String>(
+                          data: phrase,
+                          feedback: Material(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.deepPurple,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                phrase,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          childWhenDragging: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              phrase,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.all(2),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  phrase,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _userOrder.removeAt(index);
+                                      _shuffledWords.add(phrase);
+                                    });
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            );
+          },
+        ),
+        
+        const SizedBox(height: 20),
+        
+        // Shuffled phrases to drag
+        Expanded(
+          child: SingleChildScrollView(
+            child: Wrap(
+              children: _shuffledWords.map((phrase) {
+                return Draggable<String>(
+                  data: phrase,
+                  feedback: Material(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        phrase,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  childWhenDragging: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      phrase,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      phrase,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        
+        const SizedBox(height: 20),
+        
+        // Check button
+        ElevatedButton.icon(
+          onPressed: _checkDragDropOrder,
+          icon: const Icon(Icons.check, size: 20),
+          label: const Text("Check Order"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

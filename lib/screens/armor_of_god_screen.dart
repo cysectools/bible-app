@@ -295,25 +295,27 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              Text(
-                verse,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withOpacity(0.9),
-                  fontStyle: FontStyle.italic,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 2,
-                      color: Colors.black54,
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      verse,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.9),
+                        fontStyle: FontStyle.italic,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 2,
+                            color: Colors.black54,
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ],
+                  ),
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
             ],
           ),
         ),
