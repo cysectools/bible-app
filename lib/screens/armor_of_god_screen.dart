@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
+import 'armor_of_god_practice.dart';
+import 'main_navigation.dart';
 
 class ArmorOfGodScreen extends StatefulWidget {
   final ValueChanged<int>? onSelectTab;
@@ -97,8 +100,12 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
         drawer: CustomDrawer(
           currentScreen: 'Armor of God',
           onNavigate: (index) {
-            Navigator.pop(context);
-            widget.onSelectTab?.call(index);
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MainNavigation(initialIndex: index),
+              ),
+            );
           },
         ),
         body: _showAdvice ? _buildAdviceDisplay() : _buildArmorGrid(),
@@ -190,6 +197,24 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                       ],
                     ),
                   ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => ArmorOfGodPracticeScreen()),
+                      );
+                    },
+                    icon: const Icon(Icons.school, color: Colors.white),
+                    label: const Text('Memorize Armor Of God'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 8,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -202,23 +227,39 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
   Widget _buildArmorPiece(String title, String verse, IconData icon, String advice) {
     return GestureDetector(
       onTap: () => _selectArmorPiece(title, advice),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.deepPurple.withOpacity(0.3),
-            width: 2,
+      child: AnimatedBorderContainer(
+        borderRadius: 20,
+        borderColor: const Color(0xFF9E9E9E),
+        borderWidth: 3,
+        backgroundColor: Colors.transparent,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF9E9E9E).withOpacity(0.2),
+            blurRadius: 15,
+            spreadRadius: 4,
+            offset: const Offset(0, 4),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.deepPurple.withOpacity(0.2),
-              blurRadius: 15,
-              spreadRadius: 3,
-              offset: const Offset(0, 5),
+          BoxShadow(
+            color: const Color(0xFFE0E0E0).withOpacity(0.1),
+            blurRadius: 8,
+            spreadRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.05),
+            blurRadius: 5,
+            spreadRadius: 1,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.5),
+              width: 2.5,
             ),
-          ],
-        ),
+          ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -240,9 +281,16 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(1, 1),
+                      blurRadius: 2,
+                      color: Colors.black54,
+                    ),
+                  ],
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -250,9 +298,17 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
               Text(
                 verse,
                 style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.deepPurple.withOpacity(0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withOpacity(0.9),
                   fontStyle: FontStyle.italic,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(1, 1),
+                      blurRadius: 2,
+                      color: Colors.black54,
+                    ),
+                  ],
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 3,
@@ -260,6 +316,7 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
               ),
             ],
           ),
+        ),
         ),
       ),
     );
