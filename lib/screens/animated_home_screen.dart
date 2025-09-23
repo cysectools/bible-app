@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../widgets/animated_background.dart';
 import '../widgets/animated_border_container.dart';
 import '../widgets/custom_drawer.dart';
+import '../widgets/language_selector.dart';
+import '../services/language_service.dart';
+import '../providers/app_state_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'verse_screen_image.dart';
@@ -275,7 +279,11 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("🌟 Space of Emotions"),
+          title: Consumer<AppStateProvider>(
+            builder: (context, appState, child) {
+              return Text("🌟 ${appState.translate(AppTranslations.welcome)}");
+            },
+          ),
           titleTextStyle: TextStyle(
             color: Colors.deepPurple,
             fontSize: isMobile ? 18 : 20,
@@ -290,6 +298,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             ),
           ),
           actions: [
+            const CompactLanguageSelector(),
             IconButton(
               icon: Icon(
                 _ocdMode ? Icons.grid_on : Icons.grid_off,

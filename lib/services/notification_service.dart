@@ -5,15 +5,21 @@ import 'package:timezone/data/latest_all.dart' as tz;
 class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
 
-  Future init() async {
-    tz.initializeTimeZones();
+  Future<bool> init() async {
+    try {
+      tz.initializeTimeZones();
 
-    const settings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-      iOS: DarwinInitializationSettings(),
-    );
+      const settings = InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(),
+      );
 
-    await _plugin.initialize(settings);
+      await _plugin.initialize(settings);
+      return true;
+    } catch (e) {
+      print('❌ Notification service initialization error: $e');
+      return false;
+    }
   }
 
   Future scheduleDailyReminder(int hour, int minute) async {
