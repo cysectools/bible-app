@@ -211,6 +211,11 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       _currentVerse = "";
       _currentMood = null;
     });
+    // Ensure emojis are recreated when returning to emoji selection
+    _createEmojis();
+    // Restart the emoji animation
+    _emojiController.reset();
+    _emojiController.forward();
   }
 
   void _toggleOCDMode() {
@@ -263,14 +268,17 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("🌟 Space of Emotions"),
-          titleTextStyle: const TextStyle(
+          titleTextStyle: TextStyle(
             color: Colors.deepPurple,
-            fontSize: 20,
+            fontSize: isMobile ? 18 : 20,
             fontWeight: FontWeight.bold,
           ),
           backgroundColor: Colors.transparent,
@@ -316,6 +324,10 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   }
 
   Widget _buildEmojiSpace() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    final isTablet = screenSize.width >= 600 && screenSize.width < 1024;
+    
     return AnimatedBuilder(
       animation: _emojiAnimation,
       builder: (context, child) {
@@ -325,14 +337,14 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             children: [
               // Title
               Positioned(
-                top: 50,
+                top: isMobile ? 30 : 50,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Text(
                     "How are you feeling today?",
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: isMobile ? 22 : (isTablet ? 25 : 28),
                       fontWeight: FontWeight.bold,
                       color: Colors.deepPurple,
                       shadows: [
@@ -356,34 +368,38 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   }
 
   Widget _buildVerseDisplay() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    final isTablet = screenSize.width >= 600 && screenSize.width < 1024;
+    
     return Center(
       child: AnimatedBorderContainer(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(32),
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.6,
-        borderRadius: 20,
+        margin: EdgeInsets.all(isMobile ? 12 : 20),
+        padding: EdgeInsets.all(isMobile ? 20 : (isTablet ? 26 : 32)),
+        width: MediaQuery.of(context).size.width * (isMobile ? 0.95 : 0.9),
+        height: MediaQuery.of(context).size.height * (isMobile ? 0.7 : 0.6),
+        borderRadius: isMobile ? 16 : 20,
         borderColor: const Color(0xFF9E9E9E),
-        borderWidth: 3,
+        borderWidth: isMobile ? 2 : 3,
         backgroundColor: Colors.transparent,
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF9E9E9E).withOpacity(0.2),
-            blurRadius: 15,
-            spreadRadius: 4,
-            offset: const Offset(0, 4),
+            blurRadius: isMobile ? 10 : 15,
+            spreadRadius: isMobile ? 2 : 4,
+            offset: Offset(0, isMobile ? 2 : 4),
           ),
           BoxShadow(
             color: const Color(0xFFE0E0E0).withOpacity(0.1),
-            blurRadius: 8,
-            spreadRadius: 2,
-            offset: const Offset(0, 2),
+            blurRadius: isMobile ? 6 : 8,
+            spreadRadius: isMobile ? 1 : 2,
+            offset: Offset(0, isMobile ? 1 : 2),
           ),
           BoxShadow(
             color: Colors.white.withOpacity(0.05),
-            blurRadius: 5,
-            spreadRadius: 1,
-            offset: const Offset(0, 1),
+            blurRadius: isMobile ? 3 : 5,
+            spreadRadius: isMobile ? 0.5 : 1,
+            offset: Offset(0, isMobile ? 0.5 : 1),
           ),
         ],
         child: Container(
@@ -447,124 +463,237 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _resetSelection,
-                        icon: const Icon(Icons.refresh, color: Colors.deepPurple),
-                        label: const Text("New Mood", style: TextStyle(color: Colors.deepPurple)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple.withOpacity(0.1),
-                          foregroundColor: Colors.deepPurple,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.deepPurple.withOpacity(0.3)),
-                          ),
+                  // Actions button with popup menu
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _showActionMenu(context);
+                      },
+                      icon: Icon(Icons.more_horiz, color: Colors.white, size: isMobile ? 20 : 24),
+                      label: Text(
+                        "Actions",
+                        style: TextStyle(fontSize: isMobile ? 14 : 16),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 20 : 24, 
+                          vertical: isMobile ? 12 : 16
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
                         ),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          final success = await VersesService.add(_currentVerse);
-                          if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("✅ Verse added to your collection!"),
-                                backgroundColor: Colors.green,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("⚠️ Verse already exists in your collection"),
-                                backgroundColor: Colors.orange,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.bookmark_add, color: Colors.white),
-                        label: const Text("Add to Verses"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => VerseImageScreen(verse: _currentVerse),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.image, color: Colors.white),
-                        label: const Text("Save as Image"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("🔄 Refreshing verse cache..."),
-                              backgroundColor: Colors.blue,
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                          
-                          await SmartVerseService.forceRefresh();
-                          
-                          // Load a new verse with the refreshed cache
-                          if (_currentMood != null) {
-                            try {
-                              setState(() => _currentVerse = "Loading fresh verse...");
-                              final verse = await _getMoodSpecificVerse(_currentMood!);
-                              setState(() => _currentVerse = verse);
-                            } catch (e) {
-                              setState(() => _currentVerse = "Error loading fresh verse: $e");
-                            }
-                          }
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("✅ Verse cache refreshed! Fresh verses loaded."),
-                              backgroundColor: Colors.green,
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.cloud_download, color: Colors.white),
-                        label: const Text("Refresh Cache"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showActionMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: const Text(
+                'Verse Actions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+            ),
+            
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  // New Mood button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _resetSelection();
+                      },
+                      icon: const Icon(Icons.refresh, size: 20),
+                      label: const Text("New Mood"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                        foregroundColor: Colors.deepPurple,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.deepPurple.withOpacity(0.3)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Add to Verses button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _addToVerses();
+                      },
+                      icon: const Icon(Icons.bookmark_add, size: 20),
+                      label: const Text("Add to Verses"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Save as Image button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => VerseImageScreen(verse: _currentVerse),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.image, size: 20),
+                      label: const Text("Save as Image"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Refresh Cache button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _refreshCache();
+                      },
+                      icon: const Icon(Icons.cloud_download, size: 20),
+                      label: const Text("Refresh Cache"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addToVerses() async {
+    final success = await VersesService.add(_currentVerse);
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("✅ Verse added to your collection!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("⚠️ Verse already exists in your collection"),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _refreshCache() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("🔄 Refreshing verse cache..."),
+        backgroundColor: Colors.blue,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    
+    await SmartVerseService.forceRefresh();
+    
+    // Load a new verse with the refreshed cache
+    if (_currentMood != null) {
+      try {
+        setState(() => _currentVerse = "Loading fresh verse...");
+        final verse = await _getMoodSpecificVerse(_currentMood!);
+        setState(() => _currentVerse = verse);
+      } catch (e) {
+        setState(() => _currentVerse = "Error loading fresh verse: $e");
+      }
+    }
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("✅ Verse cache refreshed! Fresh verses loaded."),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 3),
       ),
     );
   }

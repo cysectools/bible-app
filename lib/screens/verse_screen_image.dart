@@ -15,11 +15,11 @@ class VerseImageScreen extends StatefulWidget {
 
 class _VerseImageScreenState extends State<VerseImageScreen> {
   final GlobalKey _globalKey = GlobalKey();
-  File? _backgroundImage;
+  Uint8List? _backgroundImage;
   Color _backgroundColor = Colors.blueGrey;
 
   Future<void> _pickBackground() async {
-    final picked = await PhotosService.pickImageFromGallery();
+    final picked = await PhotosService.showCameraOptions(context);
     if (picked != null) {
       setState(() => _backgroundImage = picked);
     }
@@ -79,7 +79,7 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
 
 
   Future<void> _pickColor() async {
-    // Simple preset color picker via bottom sheet
+    // Expanded color palette for more options
     final colors = <Color>[
       Colors.blueGrey,
       Colors.black87,
@@ -90,35 +90,80 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
       Colors.redAccent,
       Colors.green,
       Colors.white,
+      Colors.pink,
+      Colors.amber,
+      Colors.cyan,
+      Colors.brown,
+      Colors.grey,
+      Colors.lightBlue,
+      Colors.purple,
+      Colors.lime,
+      Colors.deepOrange,
     ];
     await showModalBottomSheet(
       context: context,
       builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: colors.map((c) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _backgroundImage = null; // color overrides image
-                    _backgroundColor = c;
-                  });
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: c,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black12),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Choose Background Color",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              // Horizontally scrollable color options
+              SizedBox(
+                height: 60,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: colors.map((c) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _backgroundImage = null; // color overrides image
+                              _backgroundColor = c;
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: c,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: c == _backgroundColor
+                                ? const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 24,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ),
@@ -182,7 +227,7 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   image: _backgroundImage != null
-                      ? DecorationImage(image: FileImage(_backgroundImage!), fit: BoxFit.cover)
+                      ? DecorationImage(image: MemoryImage(_backgroundImage!), fit: BoxFit.cover)
                       : null,
                   color: _backgroundColor,
                 ),
@@ -199,30 +244,52 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
               ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
-                onPressed: _pickBackground,
-                icon: const Icon(Icons.image),
-                label: const Text("Pick Background"),
+          // Horizontally scrollable buttons for better mobile experience
+          Container(
+            height: 80,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _pickBackground,
+                    icon: const Icon(Icons.image),
+                    label: const Text("Pick Background"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: _pickColor,
+                    icon: const Icon(Icons.color_lens),
+                    label: const Text("Pick Color"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: _saveImage,
+                    icon: const Icon(Icons.save),
+                    label: const Text("Save Image"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  TextButton(
+                    onPressed: _checkPermissions,
+                    child: const Text("Debug Permissions"),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton.icon(
-                onPressed: _pickColor,
-                icon: const Icon(Icons.color_lens),
-                label: const Text("Pick Color"),
-              ),
-              ElevatedButton.icon(
-                onPressed: _saveImage,
-                icon: const Icon(Icons.save),
-                label: const Text("Save Image"),
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: _checkPermissions,
-                child: const Text("Check Permissions (Debug)"),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 20),
         ],

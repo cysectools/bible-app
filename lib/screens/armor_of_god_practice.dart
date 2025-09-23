@@ -472,8 +472,11 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
   }
 
   Widget _buildPracticeDisplay() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
         children: [
           // Points display
@@ -585,11 +588,14 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
           // Main practice area
           Container(
             width: double.infinity,
-            height: 500, // Fixed height to make it scrollable
-            padding: const EdgeInsets.all(24),
+            constraints: BoxConstraints(
+              minHeight: isMobile ? 400 : 500,
+              maxHeight: isMobile ? 600 : 700,
+            ),
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
               border: Border.all(
                 color: Colors.deepPurple.withOpacity(0.3),
                 width: 2,
@@ -597,13 +603,15 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
               boxShadow: [
                 BoxShadow(
                   color: Colors.deepPurple.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 5,
-                  offset: const Offset(0, 8),
+                  blurRadius: isMobile ? 15 : 20,
+                  spreadRadius: isMobile ? 3 : 5,
+                  offset: Offset(0, isMobile ? 4 : 8),
                 ),
               ],
             ),
-            child: _currentMode == "listen" ? _buildListenMode() : _buildWriteMode(),
+            child: SingleChildScrollView(
+              child: _currentMode == "listen" ? _buildListenMode() : _buildWriteMode(),
+            ),
           ),
           
           const SizedBox(height: 20),
@@ -671,34 +679,37 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
   }
 
   Widget _buildListenMode() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return Column(
       children: [
         Icon(
           Icons.volume_up,
-          size: 48,
+          size: isMobile ? 40 : 48,
           color: Colors.deepPurple.withOpacity(0.7),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         Text(
           _currentArmorPiece,
-          style: const TextStyle(
-            fontSize: 24,
+          style: TextStyle(
+            fontSize: isMobile ? 20 : 24,
             fontWeight: FontWeight.bold,
             color: Colors.deepPurple,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: isMobile ? 12 : 16),
         Text(
           _currentArmorText,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: isMobile ? 16 : 18,
             color: Colors.deepPurple,
             height: 1.6,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: isMobile ? 20 : 30),
         
         // Speed controls
         Container(
@@ -806,28 +817,31 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
   }
 
   Widget _buildWriteMode() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return Column(
       children: [
         Icon(
           Icons.edit,
-          size: 48,
+          size: isMobile ? 40 : 48,
           color: Colors.deepPurple.withOpacity(0.7),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         Text(
           _currentArmorPiece,
-          style: const TextStyle(
-            fontSize: 24,
+          style: TextStyle(
+            fontSize: isMobile ? 20 : 24,
             fontWeight: FontWeight.bold,
             color: Colors.deepPurple,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: isMobile ? 12 : 16),
         Text(
           "Write the verse from memory:",
           style: TextStyle(
-            fontSize: 16,
+            fontSize: isMobile ? 14 : 16,
             color: Colors.deepPurple.withOpacity(0.8),
           ),
           textAlign: TextAlign.center,
@@ -835,22 +849,27 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
         
         // Hints display
         if (_currentWords.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: isMobile ? 12 : 16),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isMobile ? 8 : 12),
             decoration: BoxDecoration(
               color: Colors.deepPurple.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
             ),
             child: Wrap(
+              spacing: isMobile ? 2 : 4,
+              runSpacing: isMobile ? 2 : 4,
               children: _currentWords.asMap().entries.map((entry) {
                 final index = entry.key;
                 final word = entry.value;
                 final isRevealed = _revealedWords[index];
                 
                 return Container(
-                  margin: const EdgeInsets.all(2),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: EdgeInsets.all(isMobile ? 1 : 2),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 6 : 8, 
+                    vertical: isMobile ? 3 : 4
+                  ),
                   decoration: BoxDecoration(
                     color: isRevealed 
                         ? Colors.deepPurple.withOpacity(0.2)
@@ -865,7 +884,7 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
                   child: Text(
                     isRevealed ? word : "___",
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: isMobile ? 12 : 14,
                       color: isRevealed 
                           ? Colors.deepPurple
                           : Colors.grey,
@@ -880,44 +899,48 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
           ),
         ],
         
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         
-        // Writing area - now scrollable
-        SizedBox(
-          height: 200, // Fixed height to make it scrollable
+        // Writing area - responsive height
+        Container(
+          constraints: BoxConstraints(
+            minHeight: isMobile ? 120 : 150,
+            maxHeight: isMobile ? 200 : 250,
+          ),
           child: TextField(
             controller: _writingController,
             maxLines: null,
             expands: true,
             textAlignVertical: TextAlignVertical.top,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 16,
               color: Colors.deepPurple,
             ),
             decoration: InputDecoration(
               hintText: "Type the verse here...",
               hintStyle: TextStyle(
                 color: Colors.deepPurple.withOpacity(0.5),
+                fontSize: isMobile ? 14 : 16,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
                 borderSide: BorderSide(
                   color: Colors.deepPurple.withOpacity(0.3),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
                 borderSide: const BorderSide(
                   color: Colors.deepPurple,
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.all(16),
+              contentPadding: EdgeInsets.all(isMobile ? 12 : 16),
             ),
           ),
         ),
         
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         
         // Action buttons with popup menu
         Column(
@@ -929,14 +952,20 @@ class _ArmorOfGodPracticeScreenState extends State<ArmorOfGodPracticeScreen>
                 onPressed: () {
                   _showActionMenu(context);
                 },
-                icon: const Icon(Icons.more_horiz, color: Colors.white),
-                label: const Text("Actions"),
+                icon: Icon(Icons.more_horiz, color: Colors.white, size: isMobile ? 20 : 24),
+                label: Text(
+                  "Actions",
+                  style: TextStyle(fontSize: isMobile ? 14 : 16),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 20 : 24, 
+                    vertical: isMobile ? 12 : 16
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
                   ),
                 ),
               ),

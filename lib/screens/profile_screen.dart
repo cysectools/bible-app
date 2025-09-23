@@ -17,7 +17,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
   bool _isHexCodeVisible = false;
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _newUsernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _usernameFormKey = GlobalKey<FormState>();
+  final _phoneFormKey = GlobalKey<FormState>();
+  
+  // Friends and 2FA state
+  List<String> _friends = [];
+  bool _is2FAEnabled = false;
+  String? _phoneNumber;
+  bool _isEditingUsername = false;
+  bool _isEditingPhone = false;
 
   @override
   void initState() {
@@ -28,6 +39,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _usernameController.dispose();
+    _newUsernameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -39,10 +52,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _currentUser = user;
         _isLoading = false;
       });
+      _loadFriends();
+      _load2FASettings();
     } catch (e) {
       setState(() => _isLoading = false);
       _showErrorSnackBar('Failed to load profile');
     }
+  }
+
+  Future<void> _loadFriends() async {
+    // Simulate loading friends - in real app, this would come from API
+    setState(() {
+      _friends = ['John_Doe', 'Jane_Smith', 'Mike_Johnson', 'Sarah_Wilson'];
+    });
+  }
+
+  Future<void> _load2FASettings() async {
+    // Simulate loading 2FA settings - in real app, this would come from API
+    setState(() {
+      _is2FAEnabled = false;
+      _phoneNumber = null;
+    });
   }
 
   Future<void> _createProfile() async {
@@ -206,20 +236,213 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _changeUsername() async {
+    if (!_usernameFormKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      // Simulate API call to change username
+      await Future.delayed(const Duration(seconds: 1));
+      
+      setState(() {
+        _currentUser = UserProfile(
+          username: _newUsernameController.text.trim(),
+          hexCode: _currentUser!.hexCode,
+          createdAt: _currentUser!.createdAt,
+          copyCount: _currentUser!.copyCount,
+          lastCopiedAt: _currentUser!.lastCopiedAt,
+        );
+        _isEditingUsername = false;
+        _isLoading = false;
+      });
+      
+      _newUsernameController.clear();
+      _showSuccessSnackBar('Username updated successfully!');
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showErrorSnackBar('Failed to update username');
+    }
+  }
+
+  Future<void> _setup2FA() async {
+    if (!_phoneFormKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      // Simulate sending SMS verification code
+      await Future.delayed(const Duration(seconds: 2));
+      
+      setState(() {
+        _is2FAEnabled = true;
+        _phoneNumber = _phoneController.text.trim();
+        _isEditingPhone = false;
+        _isLoading = false;
+      });
+      
+      _phoneController.clear();
+      _showSuccessSnackBar('2FA enabled! Verification code sent to your phone.');
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showErrorSnackBar('Failed to setup 2FA');
+    }
+  }
+
+  Future<void> _disable2FA() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Disable 2FA',
+          style: TextStyle(
+            color: Color(0xFF6A4C93),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to disable two-factor authentication? This will make your account less secure.',
+          style: TextStyle(color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Disable',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _is2FAEnabled = false;
+        _phoneNumber = null;
+      });
+      _showSuccessSnackBar('2FA disabled successfully');
+    }
+  }
+
+  Future<void> _addFriend() async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Add Friend',
+          style: TextStyle(
+            color: Color(0xFF6A4C93),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter friend\'s username',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text(
+              'Add',
+              style: TextStyle(color: Color(0xFF6A4C93)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && !_friends.contains(result)) {
+      setState(() {
+        _friends.add(result);
+      });
+      _showSuccessSnackBar('Friend added successfully!');
+    } else if (result != null && _friends.contains(result)) {
+      _showErrorSnackBar('Friend already exists!');
+    }
+  }
+
+  Future<void> _removeFriend(String friend) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Remove Friend',
+          style: TextStyle(
+            color: Color(0xFF6A4C93),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to remove $friend from your friends list?',
+          style: const TextStyle(color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Remove',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _friends.remove(friend);
+      });
+      _showSuccessSnackBar('Friend removed successfully!');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Profile',
             style: TextStyle(
-              color: Color(0xFF6A4C93),
+              color: const Color(0xFF6A4C93),
               fontWeight: FontWeight.bold,
-              fontSize: 24,
+              fontSize: isMobile ? 20 : 24,
             ),
           ),
           centerTitle: true,
@@ -256,18 +479,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildCreateProfileForm() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    final padding = isMobile ? 12.0 : 16.0;
+    final containerPadding = isMobile ? 16.0 : 24.0;
+    final borderRadius = isMobile ? 16.0 : 20.0;
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(containerPadding),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(borderRadius),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF6A4C93).withOpacity(0.1),
@@ -278,26 +507,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Column(
               children: [
-                const Icon(
+                Icon(
                   Icons.person_add,
-                  size: 64,
-                  color: Color(0xFF6A4C93),
+                  size: isMobile ? 48 : 64,
+                  color: const Color(0xFF6A4C93),
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                SizedBox(height: isMobile ? 12 : 16),
+                Text(
                   'Create Your Profile',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: isMobile ? 20 : 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF6A4C93),
+                    color: const Color(0xFF6A4C93),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: isMobile ? 6 : 8),
                 Text(
                   'Choose a unique username and get your authentication code',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isMobile ? 14 : 16,
                     color: Colors.grey[600],
                   ),
                 ),
@@ -579,6 +808,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
           const SizedBox(height: 24),
           
+          // Account Settings
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6A4C93).withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.settings,
+                      color: Color(0xFF6A4C93),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Account Settings',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF6A4C93),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                
+                // Username Change
+                _buildUsernameSection(),
+                const SizedBox(height: 20),
+                
+                // 2FA Section
+                _build2FASection(),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Friends Section
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6A4C93).withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.people,
+                      color: Color(0xFF6A4C93),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Friends',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF6A4C93),
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: _addFriend,
+                      icon: const Icon(
+                        Icons.person_add,
+                        color: Color(0xFF6A4C93),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_friends.isEmpty)
+                  const Text(
+                    'No friends yet. Add some friends to connect!',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                else
+                  ..._friends.map((friend) => _buildFriendItem(friend)),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
           // Danger Zone
           Container(
             padding: const EdgeInsets.all(24),
@@ -666,6 +1004,280 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
+  Widget _buildUsernameSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.person,
+              color: Color(0xFF6A4C93),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Username',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6A4C93),
+              ),
+            ),
+            const Spacer(),
+            if (!_isEditingUsername)
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _isEditingUsername = true;
+                    _newUsernameController.text = _currentUser!.username;
+                  });
+                },
+                icon: const Icon(Icons.edit, size: 16),
+                label: const Text('Change'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF6A4C93),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_isEditingUsername) ...[
+          Form(
+            key: _usernameFormKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _newUsernameController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter new username',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(0xFF6A4C93), width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a username';
+                    }
+                    if (value.trim().length < 3) {
+                      return 'Username must be at least 3 characters';
+                    }
+                    if (value.trim().length > 20) {
+                      return 'Username must be less than 20 characters';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isEditingUsername = false;
+                            _newUsernameController.clear();
+                          });
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _changeUsername,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6A4C93),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Save'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ] else
+          Text(
+            _currentUser!.username,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _build2FASection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.security,
+              color: Color(0xFF6A4C93),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Two-Factor Authentication',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6A4C93),
+              ),
+            ),
+            const Spacer(),
+            Switch(
+              value: _is2FAEnabled,
+              onChanged: (value) {
+                if (value) {
+                  setState(() => _isEditingPhone = true);
+                } else {
+                  _disable2FA();
+                }
+              },
+              activeColor: const Color(0xFF6A4C93),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_is2FAEnabled) ...[
+          Text(
+            'Enabled for: ${_phoneNumber ?? "Unknown"}',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.green,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ] else if (_isEditingPhone) ...[
+          Form(
+            key: _phoneFormKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: 'Enter phone number (e.g., +1234567890)',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(0xFF6A4C93), width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a phone number';
+                    }
+                    if (!RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(value.trim())) {
+                      return 'Please enter a valid phone number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isEditingPhone = false;
+                            _phoneController.clear();
+                          });
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _setup2FA,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6A4C93),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Enable 2FA'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ] else
+          const Text(
+            'Add an extra layer of security to your account',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFriendItem(String friend) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF6A4C93).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: const Color(0xFF6A4C93).withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: const Color(0xFF6A4C93).withOpacity(0.2),
+            child: Text(
+              friend[0].toUpperCase(),
+              style: const TextStyle(
+                color: Color(0xFF6A4C93),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              friend,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6A4C93),
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () => _removeFriend(friend),
+            icon: const Icon(
+              Icons.remove_circle_outline,
+              color: Colors.red,
+              size: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();

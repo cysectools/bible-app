@@ -31,16 +31,10 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>Privacy - Photo Library Additions Usage Description</key>
-	<string>This app needs access to your photo library to save custom verse images.</string>
-	<key>Privacy - Photo Library Usage Description</key>
-	<string>This app needs access to your photo library to save custom verse images.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app saves your custom Bible verse images to your photo library.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to save custom verse images.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs access to your camera to take photos for custom verse images.</string>
+	<string>Take photos for custom Bible verse backgrounds</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select photos for custom Bible verse backgrounds</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

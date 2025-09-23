@@ -233,14 +233,17 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("🎧 Auditory Practice"),
-          titleTextStyle: const TextStyle(
+          titleTextStyle: TextStyle(
             color: Colors.deepPurple,
-            fontSize: 20,
+            fontSize: isMobile ? 18 : 20,
             fontWeight: FontWeight.bold,
           ),
           backgroundColor: Colors.transparent,
@@ -250,10 +253,11 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(isMobile ? 12 : 20),
+            child: Column(
+              children: [
               const SizedBox(height: 20),
               
               // Points display
@@ -533,7 +537,8 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                   ],
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -734,23 +739,26 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
   }
 
   Widget _buildDragDropMode() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return Column(
       children: [
         Icon(
           Icons.drag_indicator,
-          size: 48,
+          size: isMobile ? 40 : 48,
           color: Colors.deepPurple.withOpacity(0.7),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         Text(
           "Drag the phrases to put them in the correct order:",
           style: TextStyle(
-            fontSize: 16,
+            fontSize: isMobile ? 14 : 16,
             color: Colors.deepPurple.withOpacity(0.8),
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         
         // User's current order
         DragTarget<String>(
@@ -763,13 +771,13 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
           builder: (context, candidateData, rejectedData) {
             return Container(
               width: double.infinity,
-              height: 120,
-              padding: const EdgeInsets.all(12),
+              height: isMobile ? 100 : 120,
+              padding: EdgeInsets.all(isMobile ? 8 : 12),
               decoration: BoxDecoration(
                 color: candidateData.isNotEmpty
                     ? Colors.deepPurple.withOpacity(0.1)
                     : Colors.deepPurple.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
                 border: Border.all(
                   color: candidateData.isNotEmpty
                       ? Colors.deepPurple
@@ -783,11 +791,13 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                         "Drop phrases here in order...",
                         style: TextStyle(
                           color: Colors.deepPurple.withOpacity(0.5),
-                          fontSize: 16,
+                          fontSize: isMobile ? 14 : 16,
                         ),
                       ),
                     )
                   : Wrap(
+                      spacing: isMobile ? 4 : 6,
+                      runSpacing: isMobile ? 4 : 6,
                       children: _userOrder.asMap().entries.map((entry) {
                         final index = entry.key;
                         final phrase = entry.value;
@@ -795,31 +805,46 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                           data: phrase,
                           feedback: Material(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isMobile ? 8 : 12, 
+                                vertical: isMobile ? 6 : 8
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.deepPurple,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 phrase,
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: isMobile ? 12 : 14,
+                                ),
                               ),
                             ),
                           ),
                           childWhenDragging: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 8 : 12, 
+                              vertical: isMobile ? 6 : 8
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.grey.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               phrase,
-                              style: const TextStyle(color: Colors.grey),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: isMobile ? 12 : 14,
+                              ),
                             ),
                           ),
                           child: Container(
-                            margin: const EdgeInsets.all(2),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            margin: EdgeInsets.all(isMobile ? 1 : 2),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 8 : 12, 
+                              vertical: isMobile ? 6 : 8
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.deepPurple,
                               borderRadius: BorderRadius.circular(8),
@@ -827,11 +852,17 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  phrase,
-                                  style: const TextStyle(color: Colors.white),
+                                Flexible(
+                                  child: Text(
+                                    phrase,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: isMobile ? 12 : 14,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: isMobile ? 4 : 8),
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -839,10 +870,10 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
                                       _shuffledWords.add(phrase);
                                     });
                                   },
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.close,
                                     color: Colors.white,
-                                    size: 16,
+                                    size: isMobile ? 14 : 16,
                                   ),
                                 ),
                               ],
@@ -855,49 +886,72 @@ class _AuditoryPracticeScreenState extends State<AuditoryPracticeScreen>
           },
         ),
         
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 16 : 20),
         
         // Shuffled phrases to drag
-        Expanded(
+        Container(
+          constraints: BoxConstraints(
+            maxHeight: isMobile ? 200 : 250,
+          ),
           child: SingleChildScrollView(
             child: Wrap(
+              spacing: isMobile ? 4 : 6,
+              runSpacing: isMobile ? 4 : 6,
               children: _shuffledWords.map((phrase) {
                 return Draggable<String>(
                   data: phrase,
                   feedback: Material(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 8 : 12, 
+                        vertical: isMobile ? 6 : 8
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         phrase,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: isMobile ? 12 : 14,
+                        ),
                       ),
                     ),
                   ),
                   childWhenDragging: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 8 : 12, 
+                      vertical: isMobile ? 6 : 8
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       phrase,
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: isMobile ? 12 : 14,
+                      ),
                     ),
                   ),
                   child: Container(
-                    margin: const EdgeInsets.all(4),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    margin: EdgeInsets.all(isMobile ? 2 : 4),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 8 : 12, 
+                      vertical: isMobile ? 6 : 8
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       phrase,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isMobile ? 12 : 14,
+                      ),
                     ),
                   ),
                 );

@@ -97,14 +97,17 @@ class _VersesScreenState extends State<VersesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("📖 Verses"),
-          titleTextStyle: const TextStyle(
+          titleTextStyle: TextStyle(
             color: Colors.deepPurple,
-            fontSize: 20,
+            fontSize: isMobile ? 18 : 20,
             fontWeight: FontWeight.bold,
           ),
           backgroundColor: Colors.transparent,
@@ -131,11 +134,11 @@ class _VersesScreenState extends State<VersesScreen> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isMobile ? 12 : 16),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                   border: Border.all(
                     color: Colors.deepPurple.withOpacity(0.2),
                     width: 1,
@@ -143,9 +146,9 @@ class _VersesScreenState extends State<VersesScreen> {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.deepPurple.withOpacity(0.1),
-                      blurRadius: 10,
+                      blurRadius: isMobile ? 8 : 10,
                       spreadRadius: 1,
-                      offset: const Offset(0, 3),
+                      offset: Offset(0, isMobile ? 2 : 3),
                     ),
                   ],
                 ),
@@ -166,7 +169,7 @@ class _VersesScreenState extends State<VersesScreen> {
                           )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    contentPadding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: isMobile ? 12 : 16),
                   ),
                 ),
               ),
@@ -200,30 +203,30 @@ class _VersesScreenState extends State<VersesScreen> {
                           itemCount: _filteredVerses.length,
                           itemBuilder: (context, index) {
                           return AnimatedBorderContainer(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.all(20),
-                            borderRadius: 20,
+                            margin: EdgeInsets.only(bottom: isMobile ? 12 : 16),
+                            padding: EdgeInsets.all(isMobile ? 16 : 20),
+                            borderRadius: isMobile ? 16 : 20,
                             borderColor: const Color(0xFF9E9E9E),
-                            borderWidth: 3,
+                            borderWidth: isMobile ? 2 : 3,
                             backgroundColor: Colors.transparent,
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFF9E9E9E).withOpacity(0.2),
-                                blurRadius: 15,
-                                spreadRadius: 4,
-                                offset: const Offset(0, 4),
+                                blurRadius: isMobile ? 10 : 15,
+                                spreadRadius: isMobile ? 2 : 4,
+                                offset: Offset(0, isMobile ? 2 : 4),
                               ),
                               BoxShadow(
                                 color: const Color(0xFFE0E0E0).withOpacity(0.1),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 2),
+                                blurRadius: isMobile ? 6 : 8,
+                                spreadRadius: isMobile ? 1 : 2,
+                                offset: Offset(0, isMobile ? 1 : 2),
                               ),
                               BoxShadow(
                                 color: Colors.white.withOpacity(0.05),
-                                blurRadius: 5,
-                                spreadRadius: 1,
-                                offset: const Offset(0, 1),
+                                blurRadius: isMobile ? 3 : 5,
+                                spreadRadius: isMobile ? 0.5 : 1,
+                                offset: Offset(0, isMobile ? 0.5 : 1),
                               ),
                             ],
                             child: Container(

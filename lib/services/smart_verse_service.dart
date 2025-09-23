@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SmartVerseService {
-  static const String _baseUrl = 'https://ourmana.com/api';
+  // Updated to use a more reliable Bible API
+  static const String _baseUrl = 'https://bible-api.com';
   static const String _cacheKey = 'cached_verses_by_mood';
   static const String _lastFetchKey = 'last_verse_fetch';
   static const Duration _cacheExpiry = Duration(hours: 24);
@@ -152,23 +153,38 @@ class SmartVerseService {
       // Fetch multiple random verses from the API
       final List<Map<String, String>> allVerses = [];
       
-      // Try to fetch 50 random verses for better variety
-      for (int i = 0; i < 50; i++) {
+      // Try a small number of API calls first to test connectivity
+      int successfulCalls = 0;
+      int maxAttempts = 5; // Reduced from 50 to be more efficient
+      
+      for (int i = 0; i < maxAttempts; i++) {
         try {
           final verse = await _fetchRandomVerseFromApi();
           if (verse != null) {
             allVerses.add(verse);
+            successfulCalls++;
+            print('✅ Successfully fetched verse ${i + 1}: ${verse['reference']}');
           }
         } catch (e) {
-          print('Error fetching verse $i: $e');
-          // Continue with other verses
+          print('❌ Error fetching verse ${i + 1}: $e');
+          // If we get multiple failures, stop trying
+          if (i >= 2 && successfulCalls == 0) {
+            print('🛑 API appears to be down, stopping attempts');
+            break;
+          }
         }
         
         // Small delay to avoid overwhelming the API
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 200));
       }
       
-      print('📥 Fetched ${allVerses.length} verses from API');
+      print('📥 Fetched ${allVerses.length} verses from API ($successfulCalls/$maxAttempts successful)');
+      
+      if (allVerses.isEmpty || successfulCalls == 0) {
+        print('⚠️ No verses fetched from API, using fallback verses');
+        await _cacheVerses(_enhancedFallbackVerses);
+        return;
+      }
       
       // Categorize verses by mood
       final categorizedVerses = _categorizeVersesByMood(allVerses);
@@ -191,12 +207,29 @@ class SmartVerseService {
   // Fetch a single random verse from the API
   static Future<Map<String, String>?> _fetchRandomVerseFromApi() async {
     try {
+      // Use a popular Bible verse reference for the API
+      final popularReferences = [
+        'John+3:16', 'Psalm+23', 'Philippians+4:13', 'Romans+8:28', 
+        'Jeremiah+29:11', 'Proverbs+3:5-6', 'Matthew+11:28', 'Isaiah+40:31',
+        '1+Corinthians+13:4-7', 'Ephesians+2:8-9', 'Galatians+5:22-23', 'Psalm+91:1-2'
+      ];
+      
+      final randomRef = popularReferences[Random().nextInt(popularReferences.length)];
+      
       final response = await http.get(
-        Uri.parse('$_baseUrl/random'),
+        Uri.parse('$_baseUrl/$randomRef'),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
       
       if (response.statusCode == 200) {
+        // Check if response is JSON or HTML
+        final contentType = response.headers['content-type'] ?? '';
+        if (!contentType.contains('application/json')) {
+          print('⚠️ API returned non-JSON content: $contentType');
+          print('Response preview: ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}...');
+          return null;
+        }
+        
         final data = json.decode(response.body);
         final text = data['text']?.toString().trim();
         final reference = data['reference']?.toString();
@@ -207,9 +240,11 @@ class SmartVerseService {
             'reference': reference,
           };
         }
+      } else {
+        print('⚠️ API returned status code: ${response.statusCode}');
       }
     } catch (e) {
-      // Silently handle individual verse fetch errors
+      print('❌ Error fetching random verse: $e');
     }
     
     return null;

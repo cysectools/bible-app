@@ -79,14 +79,17 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("🛡️ Armor of God"),
-          titleTextStyle: const TextStyle(
+          titleTextStyle: TextStyle(
             color: Colors.deepPurple,
-            fontSize: 20,
+            fontSize: isMobile ? 18 : 20,
             fontWeight: FontWeight.bold,
           ),
           backgroundColor: Colors.transparent,
@@ -115,6 +118,15 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
   }
 
   Widget _buildArmorGrid() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    final isTablet = screenSize.width >= 600 && screenSize.width < 1024;
+    
+    // Responsive grid columns
+    final crossAxisCount = isMobile ? 1 : (isTablet ? 2 : 3);
+    final padding = isMobile ? 12.0 : 16.0;
+    final spacing = isMobile ? 12.0 : 16.0;
+    
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -123,14 +135,14 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
           child: ScaleTransition(
             scale: _scaleAnimation,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(padding),
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
+                  SizedBox(height: isMobile ? 16 : 20),
                   Text(
                     "Put on the full armor of God",
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: isMobile ? 20 : (isTablet ? 22 : 24),
                       fontWeight: FontWeight.bold,
                       color: Colors.deepPurple,
                       shadows: [
@@ -142,22 +154,23 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: isMobile ? 6 : 8),
                   Text(
                     "Ephesians 6:10-18",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: isMobile ? 14 : 16,
                       color: Colors.deepPurple.withOpacity(0.7),
                       fontStyle: FontStyle.italic,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: isMobile ? 20 : 30),
                   Expanded(
                     child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: spacing,
+                      mainAxisSpacing: spacing,
+                      childAspectRatio: isMobile ? 2.2 : 1.3,
                       children: [
                         _buildArmorPiece(
                           "Belt of Truth",
@@ -198,26 +211,35 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                       ],
                     ),
                   ),
-                  AnimatedElevatedButtonIcon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => ArmorOfGodPracticeScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.school, color: Colors.white),
-                    label: const Text('Memorize Armor Of God'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: const BorderSide(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AnimatedElevatedButtonIcon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => ArmorOfGodPracticeScreen()),
+                        );
+                      },
+                      icon: Icon(Icons.school, color: Colors.deepPurple, size: isMobile ? 20 : 24),
+                      label: Text(
+                        'Memorize Armor Of God',
+                        style: TextStyle(fontSize: isMobile ? 14 : 16),
                       ),
-                      elevation: 8,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 20 : 24, 
+                          vertical: isMobile ? 12 : 16
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          side: const BorderSide(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                        elevation: 8,
+                      ),
                     ),
                   ),
                 ],
@@ -230,63 +252,66 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
   }
 
   Widget _buildArmorPiece(String title, String verse, IconData icon, String advice) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return GestureDetector(
       onTap: () => _selectArmorPiece(title, advice),
       child: AnimatedBorderContainer(
-        borderRadius: 20,
+        borderRadius: isMobile ? 16 : 20,
         borderColor: const Color(0xFF9E9E9E),
-        borderWidth: 3,
+        borderWidth: isMobile ? 2 : 3,
         backgroundColor: Colors.transparent,
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF9E9E9E).withOpacity(0.2),
-            blurRadius: 15,
-            spreadRadius: 4,
-            offset: const Offset(0, 4),
+            blurRadius: isMobile ? 10 : 15,
+            spreadRadius: isMobile ? 2 : 4,
+            offset: Offset(0, isMobile ? 2 : 4),
           ),
           BoxShadow(
             color: const Color(0xFFE0E0E0).withOpacity(0.1),
-            blurRadius: 8,
-            spreadRadius: 2,
-            offset: const Offset(0, 2),
+            blurRadius: isMobile ? 6 : 8,
+            spreadRadius: isMobile ? 1 : 2,
+            offset: Offset(0, isMobile ? 1 : 2),
           ),
           BoxShadow(
             color: Colors.white.withOpacity(0.05),
-            blurRadius: 5,
-            spreadRadius: 1,
-            offset: const Offset(0, 1),
+            blurRadius: isMobile ? 3 : 5,
+            spreadRadius: isMobile ? 0.5 : 1,
+            offset: Offset(0, isMobile ? 0.5 : 1),
           ),
         ],
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
             border: Border.all(
               color: Colors.white.withOpacity(0.5),
-              width: 2.5,
+              width: isMobile ? 2 : 2.5,
             ),
           ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isMobile ? 8 : 12),
                 decoration: BoxDecoration(
                   color: Colors.deepPurple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
+                  size: isMobile ? 24 : 32,
                   color: Colors.deepPurple,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: isMobile ? 8 : 12),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                   shadows: [
@@ -299,13 +324,13 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: isMobile ? 6 : 8),
                 Flexible(
                   child: SingleChildScrollView(
                     child: Text(
                       verse,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: isMobile ? 10 : 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.white.withOpacity(0.9),
                         fontStyle: FontStyle.italic,
@@ -330,97 +355,146 @@ class _ArmorOfGodScreenState extends State<ArmorOfGodScreen>
   }
 
   Widget _buildAdviceDisplay() {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    final isTablet = screenSize.width >= 600 && screenSize.width < 1024;
+    
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(24),
+        margin: EdgeInsets.all(isMobile ? 12 : 20),
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
           border: Border.all(
             color: Colors.deepPurple.withOpacity(0.3),
-            width: 2,
+            width: isMobile ? 1.5 : 2,
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.deepPurple.withOpacity(0.2),
-              blurRadius: 20,
-              spreadRadius: 5,
-              offset: const Offset(0, 8),
+              blurRadius: isMobile ? 15 : 20,
+              spreadRadius: isMobile ? 3 : 5,
+              offset: Offset(0, isMobile ? 4 : 8),
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                Icons.shield,
-                size: 48,
-                color: Colors.deepPurple,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _currentArmorPiece,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _currentAdvice,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.deepPurple,
-                height: 1.6,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _resetSelection,
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text("Back"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple.withOpacity(0.1),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(isMobile ? 12 : 16),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Add to memorization or share
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Feature coming soon!")),
-                    );
-                  },
-                  icon: const Icon(Icons.bookmark_add, color: Colors.white),
-                  label: const Text("Save"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                child: Icon(
+                  Icons.shield,
+                  size: isMobile ? 36 : (isTablet ? 44 : 48),
+                  color: Colors.deepPurple,
                 ),
-              ],
-            ),
-          ],
+              ),
+              SizedBox(height: isMobile ? 12 : 16),
+              Text(
+                _currentArmorPiece,
+                style: TextStyle(
+                  fontSize: isMobile ? 18 : (isTablet ? 22 : 24),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isMobile ? 12 : 16),
+              Text(
+                _currentAdvice,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
+                  color: Colors.deepPurple,
+                  height: 1.6,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isMobile ? 20 : 24),
+              isMobile 
+                ? Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _resetSelection,
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          label: const Text("Back"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // TODO: Add to memorization or share
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Feature coming soon!")),
+                            );
+                          },
+                          icon: const Icon(Icons.bookmark_add, color: Colors.white),
+                          label: const Text("Save"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _resetSelection,
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        label: const Text("Back"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          // TODO: Add to memorization or share
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Feature coming soon!")),
+                          );
+                        },
+                        icon: const Icon(Icons.bookmark_add, color: Colors.white),
+                        label: const Text("Save"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+            ],
+          ),
         ),
       ),
     );

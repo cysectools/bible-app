@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'services/notification_service.dart';
-import 'services/photos_service.dart';
 import 'screens/splash_screen.dart';
 import 'utils/performance_monitor.dart';
 
@@ -8,17 +7,32 @@ void main() async {
   PerformanceMonitor.startTimer('app_launch');
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize services in background to avoid blocking UI
-  NotificationService().init().catchError((error) {
-    print('Notification service initialization failed: $error');
-  });
-  
-  PhotosService.initialize().catchError((error) {
-    print('Photos service initialization failed: $error');
-    return false;
-  });
+  // Initialize services with better error handling
+  await _initializeServices();
 
   runApp(const MyApp());
+}
+
+Future<void> _initializeServices() async {
+  try {
+    print('🚀 Initializing Bible App services...');
+    
+    // Initialize notification service only (photos service doesn't need initialization)
+    final notificationSuccess = await NotificationService().init().catchError((error) {
+      print('⚠️ Notification service initialization failed: $error');
+      return false;
+    });
+    
+    if (notificationSuccess) {
+      print('✅ Notification service initialized successfully');
+    } else {
+      print('⚠️ Notification service failed to initialize, but app will continue');
+    }
+    
+  } catch (e) {
+    print('❌ Error during service initialization: $e');
+    // App will still run even if services fail
+  }
 }
 
 class MyApp extends StatelessWidget {
