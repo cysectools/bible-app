@@ -34,7 +34,8 @@ class _CustomDrawerState extends State<CustomDrawer>
   final List<Map<String, dynamic>> _overflowTabs = [
     {'icon': Icons.note, 'label': 'Notes', 'index': 4},
     {'icon': Icons.group, 'label': 'Groups', 'index': 5},
-    {'icon': Icons.person, 'label': 'Profile', 'index': 6},
+    {'icon': Icons.emoji_events, 'label': 'Badges', 'index': 6},
+    {'icon': Icons.person, 'label': 'Profile', 'index': 7},
   ];
 
   @override

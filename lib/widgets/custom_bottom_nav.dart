@@ -100,9 +100,10 @@ class _CustomBottomNavState extends State<CustomBottomNav>
           ),
           
           // Floating bubble drawer
-          Positioned(
-            bottom: 80,
-            right: 10,
+          if (_isBubbleOpen)
+            Positioned(
+              bottom: 80,
+              right: 10,
             child: AnimatedBuilder(
               animation: _bubbleAnimation,
               builder: (context, child) {
