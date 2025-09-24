@@ -139,7 +139,7 @@ class LoginScreen extends StatelessWidget {
                                 width: 24,
                                 height: 24,
                                 errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.login, color: Colors.white);
+                                  return const Icon(Icons.login, color: Colors.black87);
                                 },
                               ),
                         label: Text(
@@ -149,7 +149,7 @@ class LoginScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: Colors.black87,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(

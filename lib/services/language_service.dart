@@ -329,8 +329,8 @@ class Translations {
 
       // Authentication
       AppTranslations.loginSubtitle: 'Sign in to continue your Bible journey',
-      AppTranslations.signingIn: 'Signing in...',
       AppTranslations.signInWithGoogle: 'Sign in with Google',
+      AppTranslations.signingIn: 'Signing in...',
       AppTranslations.loginTerms: 'By signing in, you agree to our Terms of Service and Privacy Policy',
       AppTranslations.signInFailed: 'Sign in failed. Please try again.',
       AppTranslations.signInError: 'Sign in error',

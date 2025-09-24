@@ -71,8 +71,18 @@ class LanguageSelector extends StatelessWidget {
               ),
             ),
             onSelected: (String languageCode) async {
-              final appState = Provider.of<AppStateProvider>(context, listen: false);
-              await appState.setLanguage(languageCode);
+              try {
+                final appState = Provider.of<AppStateProvider>(context, listen: false);
+                await appState.setLanguage(languageCode);
+              } catch (e) {
+                debugPrint('Error changing language: $e');
+                // Fallback to direct language service
+                try {
+                  await LanguageService.instance.setLanguage(languageCode);
+                } catch (e2) {
+                  debugPrint('Fallback language change also failed: $e2');
+                }
+              }
             },
             itemBuilder: (BuildContext context) {
               final appState = Provider.of<AppStateProvider>(context);
@@ -155,8 +165,18 @@ class CompactLanguageSelector extends StatelessWidget {
         ],
       ),
       onSelected: (String languageCode) async {
-        final appState = Provider.of<AppStateProvider>(context, listen: false);
-        await appState.setLanguage(languageCode);
+        try {
+          final appState = Provider.of<AppStateProvider>(context, listen: false);
+          await appState.setLanguage(languageCode);
+        } catch (e) {
+          debugPrint('Error changing language: $e');
+          // Fallback to direct language service
+          try {
+            await LanguageService.instance.setLanguage(languageCode);
+          } catch (e2) {
+            debugPrint('Fallback language change also failed: $e2');
+          }
+        }
       },
       itemBuilder: (BuildContext context) {
         final appState = Provider.of<AppStateProvider>(context);

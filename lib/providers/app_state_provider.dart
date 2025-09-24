@@ -23,10 +23,23 @@ class AppStateProvider extends ChangeNotifier {
   Future<void> setLanguage(String languageCode) async {
     if (_currentLanguageCode == languageCode) return;
     
-    await LanguageService.instance.setLanguage(languageCode);
-    _currentLanguageCode = languageCode;
-    _currentLocale = LanguageService.instance.currentLocale;
-    notifyListeners();
+    try {
+      await LanguageService.instance.setLanguage(languageCode);
+      _currentLanguageCode = languageCode;
+      _currentLocale = LanguageService.instance.currentLocale;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error setting language: $e');
+      // Try to set a fallback language
+      try {
+        await LanguageService.instance.setLanguage('en');
+        _currentLanguageCode = 'en';
+        _currentLocale = LanguageService.instance.currentLocale;
+        notifyListeners();
+      } catch (e2) {
+        debugPrint('Fallback language setting also failed: $e2');
+      }
+    }
   }
 
   /// Get translation for current language
