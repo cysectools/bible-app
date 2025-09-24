@@ -226,7 +226,6 @@ class AppTranslations {
 
   // Navigation
   static const String more = 'more';
-  static const String verses = 'verses';
   static const String memorization = 'memorization';
   static const String armor = 'armor';
   static const String notes = 'notes';
@@ -338,7 +337,6 @@ class Translations {
 
       // Navigation
       AppTranslations.more: 'More',
-      AppTranslations.verses: 'Verses',
       AppTranslations.memorization: 'Memorization',
       AppTranslations.armor: 'Armor',
       AppTranslations.notes: 'Notes',
@@ -446,7 +444,6 @@ class Translations {
 
       // Navigation
       AppTranslations.more: 'Más',
-      AppTranslations.verses: 'Versículos',
       AppTranslations.memorization: 'Memorización',
       AppTranslations.armor: 'Armadura',
       AppTranslations.notes: 'Notas',
@@ -554,7 +551,6 @@ class Translations {
 
       // Navigation
       AppTranslations.more: 'Plus',
-      AppTranslations.verses: 'Versets',
       AppTranslations.memorization: 'Mémorisation',
       AppTranslations.armor: 'Armure',
       AppTranslations.notes: 'Notes',
@@ -662,7 +658,6 @@ class Translations {
 
       // Navigation
       AppTranslations.more: 'Altro',
-      AppTranslations.verses: 'Versetti',
       AppTranslations.memorization: 'Memorizzazione',
       AppTranslations.armor: 'Armatura',
       AppTranslations.notes: 'Note',
