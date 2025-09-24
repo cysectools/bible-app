@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../services/photos_service.dart';
+import '../services/simple_photos_service.dart';
 
 class VerseImageScreen extends StatefulWidget {
   final String verse;
@@ -19,15 +19,18 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
   Color _backgroundColor = Colors.blueGrey;
 
   Future<void> _pickBackground() async {
-    final picked = await PhotosService.showCameraOptions(context);
-    if (picked != null) {
-      setState(() => _backgroundImage = picked);
-    }
+    // For now, disable background picking since we're focusing on saving
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Background picking temporarily disabled. Focus on saving verse images!'),
+        backgroundColor: Colors.orange,
+      ),
+    );
   }
 
   Future<void> _checkPermissions() async {
     // Show detailed permission analysis
-    final analysis = await PhotosService.getDetailedPermissionAnalysis();
+    final analysis = await SimplePhotosService.getDetailedPermissionAnalysis();
     
     showDialog(
       context: context,
@@ -68,7 +71,7 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                PhotosService.showPermissionDialog(context);
+                SimplePhotosService.showPermissionDialog(context);
               },
               child: const Text("Try to Fix"),
             ),
@@ -178,34 +181,22 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
       var byteData = await image.toByteData(format: ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-      // Check if we can save to gallery first
-      final canSave = await PhotosService.canSaveImages();
+      // Save using simple photos service
+      final success = await SimplePhotosService.saveImageToGallery(
+        pngBytes,
+        fileName: "bible_verse_${DateTime.now().millisecondsSinceEpoch}.png",
+      );
       
-      if (canSave) {
-        // Try to save to gallery
-        final success = await PhotosService.saveImageToGallery(
-          pngBytes,
-          fileName: "bible_verse_${DateTime.now().millisecondsSinceEpoch}",
-        );
-
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ Verse saved to Photos!")),
-          );
-        } else {
-          // Show alternative save options
-          PhotosService.showAlternativeSaveDialog(
-            context, 
-            pngBytes, 
-            fileName: "bible_verse_${DateTime.now().millisecondsSinceEpoch}",
-          );
-        }
-      } else {
-        // Show alternative save options immediately
-        PhotosService.showAlternativeSaveDialog(
-          context, 
-          pngBytes, 
-          fileName: "bible_verse_${DateTime.now().millisecondsSinceEpoch}",
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success 
+                  ? "✅ Verse image saved successfully!" 
+                  : "❌ Failed to save image"
+            ),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
         );
       }
     } catch (e) {
@@ -213,6 +204,10 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
         SnackBar(content: Text("⚠️ Error saving image: $e")),
       );
     }
+  }
+
+  Future<void> _testImageSave() async {
+    await SimplePhotosService.testImageSave(context);
   }
 
   @override
@@ -278,6 +273,11 @@ class _VerseImageScreenState extends State<VerseImageScreen> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
+                  ),
+                  const SizedBox(width: 12),
+                  TextButton(
+                    onPressed: _testImageSave,
+                    child: const Text("Test Save"),
                   ),
                   const SizedBox(width: 12),
                   TextButton(
