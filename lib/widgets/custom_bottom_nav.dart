@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
+import '../services/language_service.dart';
 
 class CustomBottomNav extends StatefulWidget {
   final int currentIndex;
@@ -20,17 +23,18 @@ class _CustomBottomNavState extends State<CustomBottomNav>
   late Animation<double> _bubbleAnimation;
   bool _isBubbleOpen = false;
 
-  final List<Map<String, dynamic>> _mainTabs = [
-    {'icon': Icons.menu_book, 'label': 'Verses', 'index': 0},
-    {'icon': Icons.home, 'label': 'Home', 'index': 1},
-    {'icon': Icons.school, 'label': 'Memorization', 'index': 2},
-    {'icon': Icons.shield, 'label': 'Armor', 'index': 3},
+  List<Map<String, dynamic>> get _mainTabs => [
+    {'icon': Icons.menu_book, 'label': AppTranslations.verses, 'index': 0},
+    {'icon': Icons.home, 'label': AppTranslations.home, 'index': 1},
+    {'icon': Icons.school, 'label': AppTranslations.memorization, 'index': 2},
+    {'icon': Icons.shield, 'label': AppTranslations.armor, 'index': 3},
   ];
 
-  final List<Map<String, dynamic>> _overflowTabs = [
-    {'icon': Icons.note, 'label': 'Notes', 'index': 4},
-    {'icon': Icons.group, 'label': 'Groups', 'index': 5},
-    {'icon': Icons.person, 'label': 'Profile', 'index': 6},
+  List<Map<String, dynamic>> get _overflowTabs => [
+    {'icon': Icons.note, 'label': AppTranslations.notes, 'index': 4},
+    {'icon': Icons.group, 'label': AppTranslations.groups, 'index': 5},
+    {'icon': Icons.emoji_events, 'label': AppTranslations.badges, 'index': 6},
+    {'icon': Icons.person, 'label': AppTranslations.profile, 'index': 7},
   ];
 
   @override
@@ -140,13 +144,17 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'More',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
+                                Consumer<AppStateProvider>(
+                                  builder: (context, appState, child) {
+                                    return Text(
+                                      appState.translate(AppTranslations.more),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    );
+                                  },
                                 ),
                                 const Spacer(),
                                 GestureDetector(
@@ -177,30 +185,34 @@ class _CustomBottomNavState extends State<CustomBottomNav>
 
   Widget _buildNavItem(Map<String, dynamic> tab) {
     final isSelected = widget.currentIndex == tab['index'];
-    return GestureDetector(
-      onTap: () => widget.onTap(tab['index']),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              tab['icon'],
-              color: isSelected ? Colors.deepPurple : Colors.grey,
-              size: 24,
+    return Consumer<AppStateProvider>(
+      builder: (context, appState, child) {
+        return GestureDetector(
+          onTap: () => widget.onTap(tab['index']),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  tab['icon'],
+                  color: isSelected ? Colors.deepPurple : Colors.grey,
+                  size: 24,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  appState.translate(tab['label']),
+                  style: TextStyle(
+                    color: isSelected ? Colors.deepPurple : Colors.grey,
+                    fontSize: 10,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              tab['label'],
-              style: TextStyle(
-                color: isSelected ? Colors.deepPurple : Colors.grey,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -228,13 +240,17 @@ class _CustomBottomNavState extends State<CustomBottomNav>
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              'More',
-              style: TextStyle(
-                color: _isBubbleOpen ? Colors.deepPurple : Colors.grey,
-                fontSize: 10,
-                fontWeight: _isBubbleOpen ? FontWeight.bold : FontWeight.normal,
-              ),
+            Consumer<AppStateProvider>(
+              builder: (context, appState, child) {
+                return Text(
+                  appState.translate(AppTranslations.more),
+                  style: TextStyle(
+                    color: _isBubbleOpen ? Colors.deepPurple : Colors.grey,
+                    fontSize: 10,
+                    fontWeight: _isBubbleOpen ? FontWeight.bold : FontWeight.normal,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -244,44 +260,48 @@ class _CustomBottomNavState extends State<CustomBottomNav>
 
   Widget _buildBubbleItem(Map<String, dynamic> tab) {
     final isSelected = widget.currentIndex == tab['index'];
-    return GestureDetector(
-      onTap: () {
-        widget.onTap(tab['index']);
-        _toggleBubble();
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              tab['icon'],
-              color: isSelected ? Colors.deepPurple : Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              tab['label'],
-              style: TextStyle(
-                color: isSelected ? Colors.deepPurple : Colors.grey[600],
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            if (isSelected) ...[
-              const Spacer(),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: Colors.deepPurple,
-                  shape: BoxShape.circle,
+    return Consumer<AppStateProvider>(
+      builder: (context, appState, child) {
+        return GestureDetector(
+          onTap: () {
+            widget.onTap(tab['index']);
+            _toggleBubble();
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(
+                  tab['icon'],
+                  color: isSelected ? Colors.deepPurple : Colors.grey[600],
+                  size: 20,
                 ),
-              ),
-            ],
-          ],
-        ),
-      ),
+                const SizedBox(width: 12),
+                Text(
+                  appState.translate(tab['label']),
+                  style: TextStyle(
+                    color: isSelected ? Colors.deepPurple : Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                if (isSelected) ...[
+                  const Spacer(),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Colors.deepPurple,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

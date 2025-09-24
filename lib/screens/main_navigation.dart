@@ -7,6 +7,7 @@ import 'armor_of_god_screen.dart';
 import 'notes_list_screen.dart';
 import 'groups_list_screen.dart';
 import 'profile_screen.dart';
+import 'badges_screen.dart';
 import '../widgets/custom_bottom_nav.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -62,6 +63,9 @@ class _MainNavigationState extends State<MainNavigation> {
         screen = const GroupsListScreen();
         break;
       case 6:
+        screen = const BadgesScreen();
+        break;
+      case 7:
         screen = const ProfileScreen();
         break;
       default:

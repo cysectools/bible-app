@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import 'services/notification_service.dart';
 import 'services/language_service.dart';
 import 'services/database_service.dart';
+import 'services/auth_service.dart';
 import 'providers/app_state_provider.dart';
 import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/main_navigation.dart';
 import 'utils/performance_monitor.dart';
 
 void main() async {
@@ -60,10 +63,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AppStateProvider()..initialize(),
-      child: Consumer<AppStateProvider>(
-        builder: (context, appState, child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppStateProvider()..initialize()),
+        ChangeNotifierProvider(create: (context) => AuthStateProvider()..initialize()),
+      ],
+      child: Consumer2<AppStateProvider, AuthStateProvider>(
+        builder: (context, appState, authState, child) {
           return MaterialApp(
             title: 'Bible App',
             theme: ThemeData(
@@ -77,7 +83,12 @@ class MyApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            home: const SplashScreen(),
+            routes: {
+              '/': (context) => const SplashScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/main': (context) => const MainNavigation(),
+            },
+            home: authState.isSignedIn ? const MainNavigation() : const LoginScreen(),
           );
         },
       ),

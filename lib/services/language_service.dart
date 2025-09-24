@@ -216,6 +216,22 @@ class AppTranslations {
   static const String badges = 'badges';
   static const String noBadgesAvailable = 'no_badges_available';
 
+  // Authentication
+  static const String loginSubtitle = 'login_subtitle';
+  static const String signingIn = 'signing_in';
+  static const String signInWithGoogle = 'sign_in_with_google';
+  static const String loginTerms = 'login_terms';
+  static const String signInFailed = 'sign_in_failed';
+  static const String signInError = 'sign_in_error';
+
+  // Navigation
+  static const String more = 'more';
+  static const String verses = 'verses';
+  static const String memorization = 'memorization';
+  static const String armor = 'armor';
+  static const String notes = 'notes';
+  static const String groups = 'groups';
+
   // Errors
   static const String networkError = 'network_error';
   static const String apiError = 'api_error';
@@ -312,6 +328,22 @@ class Translations {
       AppTranslations.badges: 'Badges',
       AppTranslations.noBadgesAvailable: 'No badges available',
 
+      // Authentication
+      AppTranslations.loginSubtitle: 'Sign in to continue your Bible journey',
+      AppTranslations.signingIn: 'Signing in...',
+      AppTranslations.signInWithGoogle: 'Sign in with Google',
+      AppTranslations.loginTerms: 'By signing in, you agree to our Terms of Service and Privacy Policy',
+      AppTranslations.signInFailed: 'Sign in failed. Please try again.',
+      AppTranslations.signInError: 'Sign in error',
+
+      // Navigation
+      AppTranslations.more: 'More',
+      AppTranslations.verses: 'Verses',
+      AppTranslations.memorization: 'Memorization',
+      AppTranslations.armor: 'Armor',
+      AppTranslations.notes: 'Notes',
+      AppTranslations.groups: 'Groups',
+
       // Errors
       AppTranslations.networkError: 'Network Error',
       AppTranslations.apiError: 'API Error',
@@ -403,6 +435,22 @@ class Translations {
       // Badges
       AppTranslations.badges: 'Insignias',
       AppTranslations.noBadgesAvailable: 'No hay insignias disponibles',
+
+      // Authentication
+      AppTranslations.loginSubtitle: 'Inicia sesión para continuar tu viaje bíblico',
+      AppTranslations.signingIn: 'Iniciando sesión...',
+      AppTranslations.signInWithGoogle: 'Iniciar sesión con Google',
+      AppTranslations.loginTerms: 'Al iniciar sesión, aceptas nuestros Términos de Servicio y Política de Privacidad',
+      AppTranslations.signInFailed: 'Error al iniciar sesión. Por favor, inténtalo de nuevo.',
+      AppTranslations.signInError: 'Error de inicio de sesión',
+
+      // Navigation
+      AppTranslations.more: 'Más',
+      AppTranslations.verses: 'Versículos',
+      AppTranslations.memorization: 'Memorización',
+      AppTranslations.armor: 'Armadura',
+      AppTranslations.notes: 'Notas',
+      AppTranslations.groups: 'Grupos',
 
       // Errors
       AppTranslations.networkError: 'Error de Red',
@@ -496,6 +544,22 @@ class Translations {
       AppTranslations.badges: 'Badges',
       AppTranslations.noBadgesAvailable: 'Aucun badge disponible',
 
+      // Authentication
+      AppTranslations.loginSubtitle: 'Connectez-vous pour continuer votre parcours biblique',
+      AppTranslations.signingIn: 'Connexion en cours...',
+      AppTranslations.signInWithGoogle: 'Se connecter avec Google',
+      AppTranslations.loginTerms: 'En vous connectant, vous acceptez nos Conditions d\'utilisation et Politique de confidentialité',
+      AppTranslations.signInFailed: 'Échec de la connexion. Veuillez réessayer.',
+      AppTranslations.signInError: 'Erreur de connexion',
+
+      // Navigation
+      AppTranslations.more: 'Plus',
+      AppTranslations.verses: 'Versets',
+      AppTranslations.memorization: 'Mémorisation',
+      AppTranslations.armor: 'Armure',
+      AppTranslations.notes: 'Notes',
+      AppTranslations.groups: 'Groupes',
+
       // Errors
       AppTranslations.networkError: 'Erreur de Réseau',
       AppTranslations.apiError: 'Erreur API',
@@ -587,6 +651,22 @@ class Translations {
       // Badges
       AppTranslations.badges: 'Badge',
       AppTranslations.noBadgesAvailable: 'Nessun badge disponibile',
+
+      // Authentication
+      AppTranslations.loginSubtitle: 'Accedi per continuare il tuo viaggio biblico',
+      AppTranslations.signingIn: 'Accesso in corso...',
+      AppTranslations.signInWithGoogle: 'Accedi con Google',
+      AppTranslations.loginTerms: 'Accedendo, accetti i nostri Termini di Servizio e Politica sulla Privacy',
+      AppTranslations.signInFailed: 'Accesso fallito. Riprova.',
+      AppTranslations.signInError: 'Errore di accesso',
+
+      // Navigation
+      AppTranslations.more: 'Altro',
+      AppTranslations.verses: 'Versetti',
+      AppTranslations.memorization: 'Memorizzazione',
+      AppTranslations.armor: 'Armatura',
+      AppTranslations.notes: 'Note',
+      AppTranslations.groups: 'Gruppi',
 
       // Errors
       AppTranslations.networkError: 'Errore di Rete',
