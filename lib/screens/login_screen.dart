@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
 import '../services/language_service.dart';
 import '../widgets/simple_language_selector.dart';
 import '../providers/app_state_provider.dart';
+import '../providers/local_auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -274,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 24),
 
                           // Submit button
-                          Consumer2<AuthStateProvider, AppStateProvider>(
+                          Consumer2<LocalAuthProvider, AppStateProvider>(
                             builder: (context, authState, appState, child) {
                               return SizedBox(
                                 width: double.infinity,
@@ -338,9 +338,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 30),
 
-                  // Google Sign In Button
-                  Consumer2<AuthStateProvider, AppStateProvider>(
-                    builder: (context, authState, appState, child) {
+                          // Google Sign In Button
+                          Consumer2<LocalAuthProvider, AppStateProvider>(
+                            builder: (context, authState, appState, child) {
                       return SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -414,7 +414,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authState = Provider.of<AuthStateProvider>(context, listen: false);
+    final authState = Provider.of<LocalAuthProvider>(context, listen: false);
     final appState = Provider.of<AppStateProvider>(context, listen: false);
 
     try {
@@ -455,31 +455,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
-    final authState = Provider.of<AuthStateProvider>(context, listen: false);
-    final appState = Provider.of<AppStateProvider>(context, listen: false);
-
-    try {
-      final success = await authState.signInWithGoogle();
-      
-      if (success && mounted) {
-        Navigator.of(context).pushReplacementNamed('/main');
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(appState.translate(AppTranslations.signInFailed)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${appState.translate(AppTranslations.signInError)}: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    // For now, disable Google Sign-In and show a message
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google Sign-In temporarily disabled. Please use email/password.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
     }
   }
 
@@ -495,7 +478,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final authState = Provider.of<AuthStateProvider>(context, listen: false);
+    final authState = Provider.of<LocalAuthProvider>(context, listen: false);
     final success = await authState.resetPassword(email);
 
     if (mounted) {
@@ -503,8 +486,8 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(
           content: Text(
             success 
-                ? 'Password reset email sent to $email'
-                : 'Failed to send password reset email',
+                ? 'Password reset! New password: newpassword123'
+                : 'Failed to reset password',
           ),
           backgroundColor: success ? Colors.green : Colors.red,
         ),

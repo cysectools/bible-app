@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'services/notification_service.dart';
 import 'services/language_service.dart';
 import 'services/database_service.dart';
-import 'services/auth_service.dart';
 import 'providers/app_state_provider.dart';
+import 'providers/local_auth_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
@@ -63,35 +63,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AppStateProvider()..initialize()),
-        ChangeNotifierProvider(create: (context) => AuthStateProvider()..initialize()),
-      ],
-      child: Consumer2<AppStateProvider, AuthStateProvider>(
-        builder: (context, appState, authState, child) {
-          return MaterialApp(
-            title: 'Bible App',
-            theme: ThemeData(
-              primarySwatch: Colors.deepPurple,
-              useMaterial3: true,
-            ),
-            locale: appState.currentLocale,
-            supportedLocales: LanguageService.instance.allLanguages.map((lang) => lang.locale),
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            routes: {
-              '/': (context) => const SplashScreen(),
-              '/login': (context) => const LoginScreen(),
-              '/main': (context) => const MainNavigation(),
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => AppStateProvider()..initialize()),
+            ChangeNotifierProvider(create: (context) => LocalAuthProvider()..initialize()),
+          ],
+          child: Consumer2<AppStateProvider, LocalAuthProvider>(
+            builder: (context, appState, authState, child) {
+              return MaterialApp(
+                title: 'Bible App',
+                theme: ThemeData(
+                  primarySwatch: Colors.deepPurple,
+                  useMaterial3: true,
+                ),
+                locale: appState.currentLocale,
+                supportedLocales: LanguageService.instance.allLanguages.map((lang) => lang.locale),
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                routes: {
+                  '/': (context) => const SplashScreen(),
+                  '/login': (context) => const LoginScreen(),
+                  '/main': (context) => const MainNavigation(),
+                },
+                home: authState.isSignedIn ? const MainNavigation() : const LoginScreen(),
+              );
             },
-            home: authState.isSignedIn ? const MainNavigation() : const LoginScreen(),
-          );
-        },
-      ),
-    );
+          ),
+        );
   }
 }
