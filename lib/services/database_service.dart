@@ -14,6 +14,28 @@ class DatabaseService {
     );
   }
 
+  /// Clean up all data and start fresh (use with caution!)
+  static Future<bool> cleanupAllData() async {
+    try {
+      debugPrint('🧹 Starting database cleanup...');
+      
+      // Delete all user profiles
+      await client.from('user_profiles').delete().neq('id', 'never_exists');
+      
+      // Delete all practice progress
+      await client.from('practice_progress').delete().neq('id', 'never_exists');
+      
+      // Delete all badges
+      await client.from('user_badges').delete().neq('id', 'never_exists');
+      
+      debugPrint('✅ Database cleanup completed successfully');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Database cleanup failed: $e');
+      return false;
+    }
+  }
+
   /// User profile operations
   static Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
@@ -27,6 +49,28 @@ class DatabaseService {
     } catch (e) {
       debugPrint('Error getting user profile: $e');
       return null;
+    }
+  }
+
+  /// Create user profile
+  static Future<bool> createUserProfile({
+    required String userId,
+    required String email,
+    required String username,
+  }) async {
+    try {
+      await client.from('user_profiles').insert({
+        'user_id': userId,
+        'email': email,
+        'username': username,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      
+      debugPrint('✅ User profile created successfully');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error creating user profile: $e');
+      return false;
     }
   }
 

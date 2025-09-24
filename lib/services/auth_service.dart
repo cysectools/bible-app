@@ -60,6 +60,72 @@ class AuthService {
     }
   }
 
+  /// Sign in with email and password
+  Future<AuthResponse?> signInWithEmailPassword(String email, String password) async {
+    try {
+      debugPrint('🔄 Starting Email/Password Sign-In...');
+      
+      final AuthResponse response = await client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.user != null) {
+        debugPrint('✅ Email/password sign-in successful');
+        return response;
+      } else {
+        debugPrint('❌ Email/password sign-in failed: No user returned');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Email/password sign-in error: $e');
+      return null;
+    }
+  }
+
+  /// Sign up with email and password
+  Future<AuthResponse?> signUpWithEmailPassword(String email, String password, String username) async {
+    try {
+      debugPrint('🔄 Starting Email/Password Sign-Up...');
+      
+      final AuthResponse response = await client.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      if (response.user != null) {
+        // Create user profile with username
+        await DatabaseService.createUserProfile(
+          userId: response.user!.id,
+          email: email,
+          username: username,
+        );
+        
+        debugPrint('✅ Email/password sign-up successful');
+        return response;
+      } else {
+        debugPrint('❌ Email/password sign-up failed: No user returned');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Email/password sign-up error: $e');
+      return null;
+    }
+  }
+
+  /// Reset password
+  Future<bool> resetPassword(String email) async {
+    try {
+      debugPrint('🔄 Sending password reset email...');
+      await client.auth.resetPasswordForEmail(email);
+      debugPrint('✅ Password reset email sent');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Password reset error: $e');
+      return false;
+    }
+  }
+
   /// Sign out
   Future<void> signOut() async {
     try {
@@ -192,6 +258,58 @@ class AuthStateProvider extends ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// Sign in with email and password
+  Future<bool> signInWithEmailPassword(String email, String password) async {
+    _setLoading(true);
+    
+    try {
+      final response = await _authService.signInWithEmailPassword(email, password);
+      if (response?.user != null) {
+        _user = response!.user;
+        await _loadUserProfile();
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      debugPrint('❌ Email/password sign in error: $error');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Sign up with email and password
+  Future<bool> signUpWithEmailPassword(String email, String password, String username) async {
+    _setLoading(true);
+    
+    try {
+      final response = await _authService.signUpWithEmailPassword(email, password, username);
+      if (response?.user != null) {
+        _user = response!.user;
+        await _loadUserProfile();
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      debugPrint('❌ Email/password sign up error: $error');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Reset password
+  Future<bool> resetPassword(String email) async {
+    try {
+      return await _authService.resetPassword(email);
+    } catch (error) {
+      debugPrint('❌ Password reset error: $error');
+      return false;
     }
   }
 

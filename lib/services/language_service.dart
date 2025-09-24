@@ -220,6 +220,8 @@ class AppTranslations {
   static const String loginSubtitle = 'login_subtitle';
   static const String signingIn = 'signing_in';
   static const String signInWithGoogle = 'sign_in_with_google';
+  static const String signIn = 'sign_in';
+  static const String signUp = 'sign_up';
   static const String loginTerms = 'login_terms';
   static const String signInFailed = 'sign_in_failed';
   static const String signInError = 'sign_in_error';
@@ -331,6 +333,8 @@ class Translations {
       AppTranslations.loginSubtitle: 'Sign in to continue your Bible journey',
       AppTranslations.signInWithGoogle: 'Sign in with Google',
       AppTranslations.signingIn: 'Signing in...',
+      AppTranslations.signIn: 'Sign In',
+      AppTranslations.signUp: 'Sign Up',
       AppTranslations.loginTerms: 'By signing in, you agree to our Terms of Service and Privacy Policy',
       AppTranslations.signInFailed: 'Sign in failed. Please try again.',
       AppTranslations.signInError: 'Sign in error',
@@ -438,6 +442,8 @@ class Translations {
       AppTranslations.loginSubtitle: 'Inicia sesión para continuar tu viaje bíblico',
       AppTranslations.signingIn: 'Iniciando sesión...',
       AppTranslations.signInWithGoogle: 'Iniciar sesión con Google',
+      AppTranslations.signIn: 'Iniciar Sesión',
+      AppTranslations.signUp: 'Registrarse',
       AppTranslations.loginTerms: 'Al iniciar sesión, aceptas nuestros Términos de Servicio y Política de Privacidad',
       AppTranslations.signInFailed: 'Error al iniciar sesión. Por favor, inténtalo de nuevo.',
       AppTranslations.signInError: 'Error de inicio de sesión',
@@ -545,6 +551,8 @@ class Translations {
       AppTranslations.loginSubtitle: 'Connectez-vous pour continuer votre parcours biblique',
       AppTranslations.signingIn: 'Connexion en cours...',
       AppTranslations.signInWithGoogle: 'Se connecter avec Google',
+      AppTranslations.signIn: 'Se Connecter',
+      AppTranslations.signUp: 'S\'inscrire',
       AppTranslations.loginTerms: 'En vous connectant, vous acceptez nos Conditions d\'utilisation et Politique de confidentialité',
       AppTranslations.signInFailed: 'Échec de la connexion. Veuillez réessayer.',
       AppTranslations.signInError: 'Erreur de connexion',
@@ -652,6 +660,8 @@ class Translations {
       AppTranslations.loginSubtitle: 'Accedi per continuare il tuo viaggio biblico',
       AppTranslations.signingIn: 'Accesso in corso...',
       AppTranslations.signInWithGoogle: 'Accedi con Google',
+      AppTranslations.signIn: 'Accedi',
+      AppTranslations.signUp: 'Registrati',
       AppTranslations.loginTerms: 'Accedendo, accetti i nostri Termini di Servizio e Politica sulla Privacy',
       AppTranslations.signInFailed: 'Accesso fallito. Riprova.',
       AppTranslations.signInError: 'Errore di accesso',
